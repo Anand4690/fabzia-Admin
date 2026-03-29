@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Add Amenities – Fabzia Admin</title>
+    <meta name="description" content="Add amenities with name and icon for a turf on the Fabzia admin panel." />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter + Roboto -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Utility CSS (design tokens) -->
+    <link rel="stylesheet" href="utility.css" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "app-bg":          "hsl(0,0%,96%)",
+              "app-heading":     "#1a1a1a",
+              "app-text":        "rgba(15,15,15,1)",
+              "app-sub":         "rgba(77,77,77,1)",
+              "app-placeholder": "rgba(171,171,171,1)",
+              "app-border":      "#d7d7d7",
+              "app-icon":        "#4d4d4d",
+              "app-btn":         "#125dcd",
+            },
+            fontFamily: {
+              inter:  ["Inter",  "sans-serif"],
+              roboto: ["Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* ── Animations ── */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in { animation: fadeIn 0.18s ease-out forwards; }
+
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-slide-up { animation: slideUp 0.22s ease-out forwards; }
+
+      /* ── Scrollbar hide ── */
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+      /* ── Bottom padding so sticky button never covers content ── */
+      .form-scroll-area { padding-bottom: 88px; }
+
+      /* ── Focus border ── */
+      input:focus, textarea:focus { border-color: #1a1a1a !important; outline: none; }
+
+      /* ── Amenity card entry animation ── */
+      .amenity-card { animation: slideUp 0.22s ease-out forwards; }
+
+      /* ── Image picker overlay ── */
+      #icon-picker-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 50;
+        align-items: flex-end;
+      }
+      #icon-picker-overlay.open { display: flex; }
+
+      #icon-picker-sheet {
+        background: #fff;
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        border-radius: 20px 20px 0 0;
+        padding: 20px;
+        animation: sheetUp 0.28s cubic-bezier(0.32,0.72,0,1) forwards;
+      }
+
+      @keyframes sheetUp {
+        from { transform: translateY(100%); }
+        to   { transform: translateY(0); }
+      }
+
+      /* ── Toast ── */
+      #toast {
+        position: fixed;
+        bottom: 90px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #1a1a1a;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        white-space: nowrap;
+        z-index: 9999;
+      }
+      #toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* ── Select Icon button hover ── */
+      .select-icon-btn:active { background: #eaeaea; }
+
+      /* ── Add Amenities link ── */
+      .add-amenity-btn:active { opacity: 0.7; }
+    </style>
+  </head>
+
+  <body class="flex justify-center min-h-screen bg-white">
+    <!-- ── Outer wrapper (max 430 px) ── -->
+    <div id="app" class="w-full max-w-[430px] min-h-screen flex flex-col relative bg-white">
+
+      <!-- ── Sticky Nav Bar ── -->
+      <div class="sticky top-0 z-30 flex items-center gap-2 px-1 py-2 border-b border-app-border bg-white h-16">
+        <button
+          onclick="window.location.href='home.html'"
+          aria-label="Go back"
+          id="btn-back"
+          class="w-12 h-12 flex items-center justify-center shrink-0 rounded-full active:bg-gray-100 transition-colors"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+              d="M16.966 5.25L10.216 12L16.966 18.75L15.375 20.341L7.034 12L15.375 3.659L16.966 5.25Z"
+              fill="#1A1A1A"/>
+          </svg>
+        </button>
+        <span class="font-inter text-[18px] font-normal leading-[28px] tracking-[0.04px] text-app-heading">
+          Add Amenities
+        </span>
+      </div>
+
+      <!-- ── Scrollable Form ── -->
+      <div id="form-area" class="flex-1 flex flex-col px-5 pt-5 overflow-y-auto scrollbar-hide" style="padding-bottom: 0;">
+
+        <!-- Section label -->
+        <p class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading mb-2">
+          Amenities Name &amp; Icon
+        </p>
+
+        <!-- ── Amenity Cards Container ── -->
+        <div id="amenities-list" class="flex flex-col gap-3 mb-4">
+          <!-- First card rendered by JS on load -->
+        </div>
+
+        <!-- ── + Add Amenities ── -->
+        <button
+          id="btn-add-amenity"
+          type="button"
+          onclick="addAmenityCard()"
+          class="add-amenity-btn flex items-center gap-2 mb-6 transition-opacity"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 4.167v11.666M4.167 10h11.666" stroke="#0f0f0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text">
+            Add Amenities
+          </span>
+        </button>
+
+      </div><!-- /form-scroll-area -->
+
+      <!-- ── Sticky Bottom Button (same as all other screens) ── -->
+      <div class="sticky bottom-0 z-30 w-full px-5 py-4 border-t border-app-border bg-white">
+        <button
+          id="btn-confirm"
+          type="button"
+          onclick="handleConfirm()"
+          class="w-full h-[52px] bg-app-btn text-white rounded-[8px] font-inter text-[16px] font-semibold leading-[24px] tracking-[0.04px] active:opacity-90 transition-opacity"
+        >
+          Confirm
+        </button>
+      </div>
+
+    </div><!-- /app -->
+
+    <!-- ══════════════════════════════════════════════════════
+         IMAGE PICKER BOTTOM SHEET
+    ══════════════════════════════════════════════════════ -->
+    <div id="icon-picker-overlay" onclick="handleOverlayClick(event)">
+      <div id="icon-picker-sheet" onclick="event.stopPropagation()">
+        <!-- Handle bar -->
+        <div class="flex justify-center mb-4">
+          <div class="w-10 h-1 rounded-full bg-gray-300"></div>
+        </div>
+
+        <!-- Sheet title -->
+        <p class="font-inter text-[16px] font-semibold text-app-heading mb-4 text-center">Select Icon</p>
+
+        <!-- Upload button -->
+        <label
+          for="file-input-picker"
+          class="flex flex-col items-center justify-center w-full h-[120px] border-2 border-dashed border-app-border rounded-[12px] cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors mb-4"
+        >
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-2 text-app-sub">
+            <path d="M12 16V8M9 11l3-3 3 3" stroke="#4d4d4d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20 16.7A4 4 0 0 0 17 9h-.9A7 7 0 1 0 5 15.9" stroke="#4d4d4d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="font-inter text-[13px] font-normal text-app-placeholder">Tap to upload an image</span>
+          <span class="font-inter text-[11px] text-app-placeholder mt-0.5">PNG, JPG, SVG supported</span>
+        </label>
+        <input
+          id="file-input-picker"
+          type="file"
+          accept="image/*"
+          class="hidden"
+          onchange="handleFileSelected(event)"
+        />
+
+        <!-- Cancel -->
+        <button
+          type="button"
+          onclick="closeIconPicker()"
+          class="w-full h-[48px] rounded-[8px] border border-app-border font-inter text-[15px] font-semibold text-app-heading active:bg-gray-50 transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast">Saved successfully!</div>
+
+    <script>
+      /* ═══════════════════════════════════════════════
+         STATE
+      ═══════════════════════════════════════════════ */
+      let amenityCards   = [];   // array of { id, name, fileName }
+      let cardCounter    = 0;
+      let activeCardId   = null; // which card's icon-picker is open
+
+      /* ═══════════════════════════════════════════════
+         INIT
+      ═══════════════════════════════════════════════ */
+      document.addEventListener("DOMContentLoaded", () => {
+        addAmenityCard(); // start with one card
+      });
+
+      /* ═══════════════════════════════════════════════
+         ADD AMENITY CARD
+      ═══════════════════════════════════════════════ */
+      function addAmenityCard() {
+        const id = ++cardCounter;
+        amenityCards.push({ id, name: "", fileName: "" });
+
+        const list = document.getElementById("amenities-list");
+        const card = document.createElement("div");
+        card.id          = `card-${id}`;
+        card.className   = "amenity-card flex flex-col gap-2";
+        card.innerHTML   = renderCardHTML(id);
+        list.appendChild(card);
+      }
+
+      /* ═══════════════════════════════════════════════
+         RENDER CARD HTML
+      ═══════════════════════════════════════════════ */
+      function renderCardHTML(id) {
+        const card = amenityCards.find(c => c.id === id);
+        if (!card) return "";
+
+        const hasIcon = !!card.fileName;
+        const showDelete = amenityCards.length > 1;
+
+        return `
+          <!-- Card header row: index label + optional delete -->
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="font-inter text-[12px] font-semibold text-app-placeholder uppercase tracking-widest">
+              Amenity ${amenityCards.findIndex(c => c.id === id) + 1}
+            </span>
+            ${showDelete ? `
+            <button
+              type="button"
+              onclick="removeAmenityCard(${id})"
+              aria-label="Remove amenity"
+              class="text-[#c0392b] font-inter text-[14px] font-semibold active:opacity-70 transition-opacity"
+            >
+              Remove
+            </button>` : ''}
+          </div>
+
+          <!-- Amenities Name input -->
+          <input
+            id="name-input-${id}"
+            type="text"
+            placeholder="Amenities Name"
+            value="${escapeHtml(card.name)}"
+            oninput="updateCardName(${id}, this.value)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors"
+          />
+
+          <!-- Icon selector / selected state -->
+          ${hasIcon ? renderSelectedIconHTML(id, card.fileName) : renderSelectIconHTML(id)}
+        `;
+      }
+
+      /* Select Icon button (no icon yet) */
+      function renderSelectIconHTML(id) {
+        return `
+          <button
+            id="icon-btn-${id}"
+            type="button"
+            onclick="openIconPicker(${id})"
+            class="select-icon-btn w-full h-[52px] px-3 flex items-center rounded-[8px] border border-app-border bg-[#f5f5f5] transition-colors"
+          >
+            <span class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text">
+              Select Icon
+            </span>
+          </button>
+        `;
+      }
+
+      /* Truncate filename: first 5 chars + ... + extension */
+      function truncateFileName(name) {
+        const dotIdx = name.lastIndexOf('.');
+        const ext  = dotIdx > -1 ? name.slice(dotIdx) : '';       // e.g. ".png"
+        const base = dotIdx > -1 ? name.slice(0, dotIdx) : name;  // e.g. "screenshot_2024"
+        if (base.length <= 5) return escapeHtml(name);            // already short
+        return escapeHtml(base.slice(0, 5) + '...' + ext);        // "scree....png"
+      }
+
+      /* Selected icon row */
+      function renderSelectedIconHTML(id, fileName) {
+        return `
+          <div
+            id="icon-btn-${id}"
+            class="w-full h-[52px] px-3 flex items-center justify-between rounded-[8px] border border-app-border bg-[#f5f5f5]"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <!-- X / close icon -->
+              <button
+                type="button"
+                onclick="clearIcon(${id})"
+                aria-label="Remove icon"
+                class="flex items-center justify-center w-5 h-5 shrink-0 active:opacity-70 transition-opacity"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 5L5 15M5 5l10 10" stroke="#0f0f0f" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </button>
+              <span class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text">
+                ${truncateFileName(fileName)}
+              </span>
+            </div>
+
+          </div>
+        `;
+      }
+
+      /* ═══════════════════════════════════════════════
+         UPDATE NAME
+      ═══════════════════════════════════════════════ */
+      function updateCardName(id, value) {
+        const card = amenityCards.find(c => c.id === id);
+        if (card) card.name = value;
+      }
+
+      /* ═══════════════════════════════════════════════
+         ICON PICKER
+      ═══════════════════════════════════════════════ */
+      function openIconPicker(cardId) {
+        activeCardId = cardId;
+        // Reset file input so same file can be re-selected
+        document.getElementById("file-input-picker").value = "";
+        document.getElementById("icon-picker-overlay").classList.add("open");
+      }
+
+      function closeIconPicker() {
+        document.getElementById("icon-picker-overlay").classList.remove("open");
+        activeCardId = null;
+      }
+
+      function handleOverlayClick(e) {
+        if (e.target === document.getElementById("icon-picker-overlay")) {
+          closeIconPicker();
+        }
+      }
+
+      function handleFileSelected(event) {
+        const file = event.target.files[0];
+        if (!file || activeCardId === null) return;
+
+        const card = amenityCards.find(c => c.id === activeCardId);
+        if (!card) return;
+
+        card.fileName = file.name;
+
+        // Re-render the card's icon section
+        const cardEl = document.getElementById(`card-${activeCardId}`);
+        if (cardEl) {
+          cardEl.innerHTML = renderCardHTML(activeCardId);
+        }
+
+        closeIconPicker();
+        showToast(`"${file.name}" selected`);
+      }
+
+      /* ═══════════════════════════════════════════════
+         CLEAR ICON
+      ═══════════════════════════════════════════════ */
+      function clearIcon(id) {
+        const card = amenityCards.find(c => c.id === id);
+        if (!card) return;
+        card.fileName = "";
+        const cardEl = document.getElementById(`card-${id}`);
+        if (cardEl) cardEl.innerHTML = renderCardHTML(id);
+      }
+
+      /* ═══════════════════════════════════════════════
+         REMOVE AMENITY CARD
+      ═══════════════════════════════════════════════ */
+      function removeAmenityCard(id) {
+        // Must keep at least 1 card
+        if (amenityCards.length <= 1) return;
+
+        // Sync current name before removing
+        amenityCards.forEach(card => {
+          const input = document.getElementById(`name-input-${card.id}`);
+          if (input) card.name = input.value;
+        });
+
+        // Remove from state
+        amenityCards = amenityCards.filter(c => c.id !== id);
+
+        // Remove DOM element with a fade-out
+        const cardEl = document.getElementById(`card-${id}`);
+        if (cardEl) {
+          cardEl.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+          cardEl.style.opacity    = '0';
+          cardEl.style.transform  = 'translateY(-6px)';
+          setTimeout(() => {
+            cardEl.remove();
+            // Re-render all remaining cards to refresh numbering + delete-button visibility
+            rerenderAllCards();
+          }, 180);
+        }
+      }
+
+      /* Re-render all card interiors (numbering + delete-btn visibility) */
+      function rerenderAllCards() {
+        amenityCards.forEach(card => {
+          // Sync name from input before re-render
+          const input = document.getElementById(`name-input-${card.id}`);
+          if (input) card.name = input.value;
+
+          const cardEl = document.getElementById(`card-${card.id}`);
+          if (cardEl) cardEl.innerHTML = renderCardHTML(card.id);
+        });
+      }
+
+      /* ═══════════════════════════════════════════════
+         HELPERS
+      ═══════════════════════════════════════════════ */
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      /* ═══════════════════════════════════════════════
+         TOAST
+      ═══════════════════════════════════════════════ */
+      function showToast(msg) {
+        const toast = document.getElementById("toast");
+        toast.textContent = msg;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2500);
+      }
+
+      /* ═══════════════════════════════════════════════
+         CONFIRM
+      ═══════════════════════════════════════════════ */
+      function handleConfirm() {
+        // Sync names from inputs before validating
+        amenityCards.forEach(card => {
+          const input = document.getElementById(`name-input-${card.id}`);
+          if (input) card.name = input.value.trim();
+        });
+
+        // Validate
+        for (const card of amenityCards) {
+          if (!card.name) {
+            showToast("Please enter an amenity name.");
+            document.getElementById(`name-input-${card.id}`)?.focus();
+            return;
+          }
+          if (!card.fileName) {
+            showToast("Please select an icon for each amenity.");
+            return;
+          }
+        }
+
+        const payload = amenityCards.map(c => ({ name: c.name, icon: c.fileName }));
+        console.log("Add Amenities payload:", payload);
+        showToast("Amenities saved successfully!");
+        /* TODO: wire to API */
+      }
+    </script>
+  </body>
+</html>

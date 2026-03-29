@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Add Turf – Fabzia Admin</title>
+    <meta name="description" content="Add a new turf with location, amenities, dimensions and booking mode." />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter + Roboto -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Utility CSS (design tokens) -->
+    <link rel="stylesheet" href="utility.css" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "app-bg":          "hsl(0,0%,96%)",
+              "app-heading":     "#1a1a1a",
+              "app-text":        "rgba(15,15,15,1)",
+              "app-sub":         "rgba(77,77,77,1)",
+              "app-placeholder": "rgba(171,171,171,1)",
+              "app-border":      "#d7d7d7",
+              "app-icon":        "#4d4d4d",
+              "app-btn":         "#125dcd",
+              "app-field-bg":    "#f5f5f5",
+            },
+            fontFamily: {
+              inter:  ["Inter",  "sans-serif"],
+              roboto: ["Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* ── Animations ── */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in { animation: fadeIn 0.18s ease-out forwards; }
+
+      /* ── Scrollbar hide ── */
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+      /* ── Bottom padding so sticky button never covers content ── */
+      .form-scroll-area { padding-bottom: 88px; }
+
+      /* ── Smooth focus border ── */
+      input:focus, textarea:focus { border-color: #1a1a1a !important; }
+    </style>
+  </head>
+
+  <body class="flex justify-center min-h-screen" style="background:hsl(0,0%,96%)">
+    <!-- ── Outer wrapper (max 430 px) ── -->
+    <div id="app" class="w-full max-w-[430px] min-h-screen flex flex-col relative" style="background:hsl(0,0%,96%)">
+
+      <!-- ── Sticky Nav Bar ── -->
+      <div class="sticky top-0 z-30 flex items-center gap-2 px-1 py-2 border-b border-app-border bg-white h-16">
+        <button
+          id="btn-back"
+          onclick="window.location.href='home.html'"
+          aria-label="Go back"
+          class="w-12 h-12 flex items-center justify-center shrink-0 rounded-full active:bg-gray-100 transition-colors"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              fill-rule="evenodd" clip-rule="evenodd"
+              d="M16.966 5.25L10.216 12L16.966 18.75L15.375 20.341L7.034 12L15.375 3.659L16.966 5.25Z"
+              fill="#1A1A1A"
+            />
+          </svg>
+        </button>
+        <span class="font-inter text-[18px] font-normal leading-[28px] tracking-[0.04px] text-app-heading">
+          Add Turf
+        </span>
+      </div>
+
+      <!-- ── Scrollable Form ── -->
+      <div class="flex flex-col gap-6 px-5 pt-5 form-scroll-area">
+
+        <!-- Turf Name -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Turf Name</label>
+          <input
+            id="field-turfName"
+            type="text"
+            placeholder="Turf Name"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
+          />
+        </div>
+
+        <!-- Turf Image URL -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Turf Image url</label>
+          <div class="flex flex-col gap-2">
+            <!-- URL rows container -->
+            <div id="image-url-list" class="flex flex-col gap-2">
+              <!-- first row -->
+              <div class="image-url-row flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="example.com"
+                  onfocus="scrollToField(this)"
+                  class="image-url-input flex-1 h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
+                />
+                <!-- remove btn: hidden when only one row -->
+                <button
+                  type="button"
+                  onclick="removeImageRow(this)"
+                  aria-label="Remove image URL"
+                  class="img-remove-btn hidden w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-50 active:bg-red-100 transition-colors shrink-0"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color:#6b7280">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <!-- Add more images button -->
+            <button
+              type="button"
+              onclick="addImageRow()"
+              class="flex items-center gap-2 h-[52px] px-3 rounded-[8px] border border-app-border bg-app-field-bg w-full active:opacity-80 transition-opacity"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="#1A1A1A" />
+              </svg>
+              <span class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text">
+                Add more Images
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Turf Address -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Turf Address</label>
+          <textarea
+            id="field-turfAddress"
+            placeholder="Turf Address"
+            rows="4"
+            onfocus="scrollToField(this)"
+            class="w-full px-3 py-2 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white resize-none transition-colors"
+            style="height:124px"
+          ></textarea>
+        </div>
+
+        <!-- Google Link -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Google Link</label>
+          <input
+            id="field-googleLink"
+            type="url"
+            placeholder="example.com"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
+          />
+        </div>
+
+        <!-- Latitude -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Latitude</label>
+          <input
+            id="field-latitude"
+            type="text"
+            inputmode="decimal"
+            placeholder="eg. 40.7128"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
+          />
+        </div>
+
+        <!-- Longitude -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Longitude</label>
+          <input
+            id="field-longitude"
+            type="text"
+            inputmode="decimal"
+            placeholder="eg. 40.7128"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
+          />
+        </div>
+
+        <!-- Amenities Multi-Select -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Amenities</label>
+          <div class="relative" id="amenities-wrapper">
+            <button
+              id="amenities-trigger"
+              type="button"
+              onclick="toggleAmenities()"
+              class="flex items-start justify-between min-h-[52px] px-3 py-2 rounded-[8px] border border-app-border w-full bg-white focus:outline-none transition-colors"
+            >
+              <!-- Chips area (mirrors Sports in addUser) -->
+              <div id="amenities-chips" class="flex flex-wrap gap-1 flex-1 text-left py-1">
+                <span class="font-roboto text-[16px] text-app-sub leading-[24px]">Select Amenities</span>
+              </div>
+              <svg
+                id="amenities-chevron"
+                width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                class="shrink-0 ml-2 mt-1 transition-transform duration-200"
+              >
+                <path d="M6 9L12 15L18 9" stroke="#4D4D4D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+
+            <!-- Dropdown -->
+            <div
+              id="amenities-menu"
+              class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-20 shadow-md overflow-hidden animate-fade-in max-h-60 overflow-y-auto scrollbar-hide"
+            >
+              <!-- injected by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Length -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Length</label>
+          <input
+            id="field-length"
+            type="text"
+            inputmode="decimal"
+            placeholder="Length"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
+          />
+        </div>
+
+        <!-- Width -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Width</label>
+          <input
+            id="field-width"
+            type="text"
+            inputmode="decimal"
+            placeholder="Width"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
+          />
+        </div>
+
+        <!-- Height -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Height</label>
+          <input
+            id="field-height"
+            type="text"
+            inputmode="decimal"
+            placeholder="Height"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
+          />
+        </div>
+
+        <!-- Turf Description -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Turf Description</label>
+          <textarea
+            id="field-turfDescription"
+            placeholder="Turf Description"
+            rows="4"
+            onfocus="scrollToField(this)"
+            class="w-full px-3 py-2 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white resize-none transition-colors"
+            style="height:124px"
+          ></textarea>
+        </div>
+
+        <!-- Turf Club Name -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Turf Club Name</label>
+          <input
+            id="field-clubName"
+            type="text"
+            placeholder="Club Name"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
+          />
+        </div>
+
+        <!-- GST Number -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Gst Number</label>
+          <input
+            id="field-gstNumber"
+            type="text"
+            placeholder="Gst Number"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
+          />
+        </div>
+
+        <!-- Booking Mode -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Booking Mode</label>
+          <div class="flex flex-col gap-2" id="booking-mode-group">
+            <!-- Offline (default selected) -->
+            <button
+              type="button"
+              data-mode="Online"
+              onclick="selectBookingMode('Online')"
+              class="booking-mode-btn flex items-center gap-2 h-12 px-3 rounded-[8px] border border-app-border transition-colors active:opacity-80"
+            >
+              <!-- Radio icon injected by JS -->
+              <span class="booking-mode-radio shrink-0"></span>
+              <span class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] booking-mode-label text-app-sub">Online</span>
+            </button>
+
+            <button
+              type="button"
+              data-mode="Offline"
+              onclick="selectBookingMode('Offline')"
+              class="booking-mode-btn flex items-center gap-2 h-12 px-3 rounded-[8px] border border-app-heading transition-colors active:opacity-80"
+            >
+              <span class="booking-mode-radio shrink-0"></span>
+              <span class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] booking-mode-label text-app-text">Offline</span>
+            </button>
+
+            <button
+              type="button"
+              data-mode="Telephonic"
+              onclick="selectBookingMode('Telephonic')"
+              class="booking-mode-btn flex items-center gap-2 h-12 px-3 rounded-[8px] border border-app-border transition-colors active:opacity-80"
+            >
+              <span class="booking-mode-radio shrink-0"></span>
+              <span class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] booking-mode-label text-app-sub">Telephonic</span>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /form-scroll-area -->
+
+      <!-- ── Sticky Bottom Button ── -->
+      <div
+        class="sticky bottom-0 z-30 w-full px-5 py-4 border-t border-app-border"
+        style="background:hsl(0,0%,96%)"
+      >
+        <button
+          id="btn-submit"
+          type="button"
+          onclick="handleSubmit()"
+          class="w-full h-[52px] bg-app-btn text-white rounded-[8px] font-inter text-[16px] font-semibold leading-[24px] tracking-[0.04px] active:opacity-90 transition-opacity"
+        >
+          Add Turf
+        </button>
+      </div>
+
+    </div><!-- /app -->
+
+    <script>
+      /* ═══════════════════════════════════════════════
+         DATA
+      ═══════════════════════════════════════════════ */
+      const AMENITIES = [
+        "Parking","Changing Rooms","Floodlights","Cafeteria",
+        "Washrooms","First Aid","Equipment Rental","Seating Area",
+      ];
+
+      /* ═══════════════════════════════════════════════
+         STATE
+      ═══════════════════════════════════════════════ */
+      let selectedAmenities = [];
+      let amenitiesOpen     = false;
+      let bookingMode       = "Offline"; /* default */
+
+      /* ═══════════════════════════════════════════════
+         SCROLL TO FIELD (focus handler)
+      ═══════════════════════════════════════════════ */
+      function scrollToField(el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 320);
+      }
+
+      /* ═══════════════════════════════════════════════
+         ADD IMAGE URL ROW
+      ═══════════════════════════════════════════════ */
+      /* ── Build one image-URL row (wrapper div + input + remove btn) ── */
+      function createImageRow() {
+        const row = document.createElement("div");
+        row.className = "image-url-row flex items-center gap-2";
+
+        const input = document.createElement("input");
+        input.type        = "text";
+        input.placeholder = "example.com";
+        input.className   =
+          "image-url-input flex-1 h-[52px] px-3 rounded-[8px] border border-app-border font-roboto " +
+          "text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text " +
+          "placeholder:text-app-placeholder outline-none bg-white transition-colors";
+        input.addEventListener("focus", () => scrollToField(input));
+
+        const rmBtn = document.createElement("button");
+        rmBtn.type      = "button";
+        rmBtn.setAttribute("aria-label", "Remove image URL");
+        rmBtn.className =
+          "img-remove-btn w-10 h-10 flex items-center justify-center rounded-full " +
+          "bg-gray-100 hover:bg-red-50 active:bg-red-100 transition-colors shrink-0";
+        rmBtn.innerHTML =
+          `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color:#6b7280">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>`;
+        rmBtn.onclick = () => removeImageRow(rmBtn);
+
+        row.appendChild(input);
+        row.appendChild(rmBtn);
+        return { row, input };
+      }
+
+      function addImageRow() {
+        const list        = document.getElementById("image-url-list");
+        const { row, input } = createImageRow();
+        list.appendChild(row);
+        syncRemoveButtons();
+        setTimeout(() => { input.focus(); scrollToField(input); }, 50);
+      }
+
+      function removeImageRow(btn) {
+        const list = document.getElementById("image-url-list");
+        /* btn could be the × button itself or its parent row */
+        const row = btn.closest(".image-url-row");
+        if (!row) return;
+        /* Don't remove if it's the only row */
+        if (list.querySelectorAll(".image-url-row").length <= 1) return;
+        row.remove();
+        syncRemoveButtons();
+      }
+
+      /* Show remove btn only when multiple rows exist */
+      function syncRemoveButtons() {
+        const list = document.getElementById("image-url-list");
+        const rows = list.querySelectorAll(".image-url-row");
+        rows.forEach((r) => {
+          const btn = r.querySelector(".img-remove-btn");
+          if (!btn) return;
+          if (rows.length > 1) btn.classList.remove("hidden");
+          else                  btn.classList.add("hidden");
+        });
+      }
+
+      /* ═══════════════════════════════════════════════
+         AMENITIES DROPDOWN
+      ═══════════════════════════════════════════════ */
+      function buildAmenitiesMenu() {
+        const menu = document.getElementById("amenities-menu");
+        menu.innerHTML = "";
+        AMENITIES.forEach((amenity) => {
+          const selected = selectedAmenities.includes(amenity);
+          const btn = document.createElement("button");
+          btn.type      = "button";
+          btn.className =
+            "flex items-center gap-3 w-full px-3 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left";
+          btn.innerHTML = `
+            <!-- Radio dot -->
+            <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0
+              ${selected ? "border-app-heading" : "border-app-border"}"
+              style="${selected ? "border-color:#1a1a1a" : "border-color:#d7d7d7"}">
+              ${selected
+                ? `<div class="w-2 h-2 rounded-full" style="background:#1a1a1a"></div>`
+                : ""}
+            </div>
+            <span class="font-roboto text-[16px] text-app-text">${amenity}</span>`;
+          btn.onclick = () => toggleAmenity(amenity);
+          menu.appendChild(btn);
+        });
+      }
+
+      function toggleAmenity(amenity) {
+        const idx = selectedAmenities.indexOf(amenity);
+        if (idx === -1) selectedAmenities.push(amenity);
+        else           selectedAmenities.splice(idx, 1);
+        updateAmenitiesChips();
+        buildAmenitiesMenu(); /* refresh dots */
+      }
+
+      function updateAmenitiesChips() {
+        const chips = document.getElementById("amenities-chips");
+        chips.innerHTML = "";
+        if (selectedAmenities.length === 0) {
+          chips.innerHTML =
+            `<span class="font-roboto text-[16px] text-app-sub leading-[24px]">Select Amenities</span>`;
+        } else {
+          selectedAmenities.forEach((a) => {
+            const span = document.createElement("span");
+            span.className =
+              "inline-flex items-center gap-1 bg-gray-100 text-app-text text-[13px] font-roboto px-2 py-0.5 rounded-full";
+            span.innerHTML =
+              `${a}
+              <button type="button" onclick="removeAmenityChip(event,'${a}')"
+                class="ml-0.5 leading-none text-gray-500 hover:text-red-500 transition-colors"
+                aria-label="Remove ${a}">&times;</button>`;
+            chips.appendChild(span);
+          });
+        }
+      }
+
+      function removeAmenityChip(e, amenity) {
+        e.stopPropagation(); /* prevent toggling dropdown */
+        const idx = selectedAmenities.indexOf(amenity);
+        if (idx !== -1) selectedAmenities.splice(idx, 1);
+        updateAmenitiesChips();
+        if (amenitiesOpen) buildAmenitiesMenu(); /* refresh dots if open */
+      }
+
+      function toggleAmenities() {
+        amenitiesOpen = !amenitiesOpen;
+        const menu    = document.getElementById("amenities-menu");
+        const chevron = document.getElementById("amenities-chevron");
+        if (amenitiesOpen) {
+          menu.classList.remove("hidden");
+          buildAmenitiesMenu();
+          chevron.style.transform = "rotate(180deg)";
+        } else {
+          menu.classList.add("hidden");
+          chevron.style.transform = "";
+        }
+      }
+
+      /* Close amenities when clicking outside */
+      document.addEventListener("click", (e) => {
+        const wrapper = document.getElementById("amenities-wrapper");
+        if (!wrapper.contains(e.target) && amenitiesOpen) {
+          amenitiesOpen = false;
+          document.getElementById("amenities-menu").classList.add("hidden");
+          document.getElementById("amenities-chevron").style.transform = "";
+        }
+      });
+
+      /* ═══════════════════════════════════════════════
+         BOOKING MODE
+      ═══════════════════════════════════════════════ */
+      /* SVG icons */
+      const RADIO_SELECTED = `
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 1.667C5.4 1.667 1.667 5.4 1.667 10C1.667 14.6 5.4 18.333 10 18.333C14.6 18.333 18.333 14.6 18.333 10C18.333 5.4 14.6 1.667 10 1.667ZM10 16.667C6.317 16.667 3.333 13.683 3.333 10C3.333 6.317 6.317 3.333 10 3.333C13.683 3.333 16.667 6.317 16.667 10C16.667 13.683 13.683 16.667 10 16.667Z" fill="#1A1A1A"/>
+          <path d="M10 14.167C12.301 14.167 14.167 12.301 14.167 10C14.167 7.699 12.301 5.833 10 5.833C7.699 5.833 5.833 7.699 5.833 10C5.833 12.301 7.699 14.167 10 14.167Z" fill="#1A1A1A"/>
+        </svg>`;
+
+      const RADIO_UNSELECTED = `
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 1.667C5.392 1.667 1.667 5.392 1.667 10C1.667 14.608 5.392 18.333 10 18.333C14.608 18.333 18.333 14.608 18.333 10C18.333 5.392 14.608 1.667 10 1.667ZM10 16.667C6.317 16.667 3.333 13.683 3.333 10C3.333 6.317 6.317 3.333 10 3.333C13.683 3.333 16.667 6.317 16.667 10C16.667 13.683 13.683 16.667 10 16.667Z" fill="#4D4D4D"/>
+        </svg>`;
+
+      function selectBookingMode(mode) {
+        bookingMode = mode;
+        document.querySelectorAll(".booking-mode-btn").forEach((btn) => {
+          const btnMode    = btn.dataset.mode;
+          const isSelected = btnMode === mode;
+          const radio      = btn.querySelector(".booking-mode-radio");
+          const label      = btn.querySelector(".booking-mode-label");
+
+          radio.innerHTML = isSelected ? RADIO_SELECTED : RADIO_UNSELECTED;
+
+          if (isSelected) {
+            btn.classList.remove("border-app-border");
+            btn.classList.add("border-app-heading");
+            btn.style.borderColor = "#1a1a1a";
+            label.style.color     = "rgba(15,15,15,1)";
+          } else {
+            btn.classList.add("border-app-border");
+            btn.classList.remove("border-app-heading");
+            btn.style.borderColor = "#d7d7d7";
+            label.style.color     = "rgba(77,77,77,1)";
+          }
+        });
+      }
+
+      /* ── Init: render radio icons + set default mode ── */
+      function initBookingMode() {
+        document.querySelectorAll(".booking-mode-btn").forEach((btn) => {
+          const radio = btn.querySelector(".booking-mode-radio");
+          radio.innerHTML =
+            btn.dataset.mode === bookingMode ? RADIO_SELECTED : RADIO_UNSELECTED;
+        });
+        /* apply border state for the initial default */
+        selectBookingMode(bookingMode);
+      }
+
+      /* ═══════════════════════════════════════════════
+         SUBMIT
+      ═══════════════════════════════════════════════ */
+      function handleSubmit() {
+        /* Gather values */
+        const urls = [...document.querySelectorAll(".image-url-input")].map((i) => i.value.trim()).filter(Boolean);
+        const payload = {
+          turfName:        document.getElementById("field-turfName").value.trim(),
+          imageUrls:       urls,
+          turfAddress:     document.getElementById("field-turfAddress").value.trim(),
+          googleLink:      document.getElementById("field-googleLink").value.trim(),
+          latitude:        document.getElementById("field-latitude").value.trim(),
+          longitude:       document.getElementById("field-longitude").value.trim(),
+          amenities:       selectedAmenities,
+          length:          document.getElementById("field-length").value.trim(),
+          width:           document.getElementById("field-width").value.trim(),
+          height:          document.getElementById("field-height").value.trim(),
+          description:     document.getElementById("field-turfDescription").value.trim(),
+          clubName:        document.getElementById("field-clubName").value.trim(),
+          gstNumber:       document.getElementById("field-gstNumber").value.trim(),
+          bookingMode,
+        };
+        console.log("Add Turf payload:", payload);
+        /* TODO: wire up to API */
+      }
+
+      /* ── Run on load ── */
+      initBookingMode();
+    </script>
+  </body>
+</html>

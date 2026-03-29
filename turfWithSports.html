@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Turf With Sports – Fabzia Admin</title>
+    <meta name="description" content="Assign a sport to a turf with timings, duration and pricing." />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="utility.css" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "app-bg":          "hsl(0,0%,96%)",
+              "app-heading":     "#1a1a1a",
+              "app-text":        "rgba(15,15,15,1)",
+              "app-sub":         "rgba(77,77,77,1)",
+              "app-placeholder": "rgba(171,171,171,1)",
+              "app-border":      "#d7d7d7",
+              "app-icon":        "#4d4d4d",
+              "app-btn":         "#125dcd",
+            },
+            fontFamily: {
+              inter:  ["Inter",  "sans-serif"],
+              roboto: ["Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in { animation: fadeIn 0.18s ease-out forwards; }
+
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+      .form-scroll-area { padding-bottom: 88px; }
+
+      input:focus, textarea:focus, select:focus {
+        border-color: #1a1a1a !important;
+        outline: none;
+      }
+
+      /* ── Time menu scroll ── */
+      .time-menu {
+        max-height: 240px; /* 5 items (48px each) */
+      }
+    </style>
+  </head>
+
+  <body class="flex justify-center min-h-screen" style="background:hsl(0,0%,96%)">
+    <div id="app" class="w-full max-w-[430px] min-h-screen flex flex-col relative" style="background:hsl(0,0%,96%)">
+
+      <!-- ── Nav ── -->
+      <div class="sticky top-0 z-30 flex items-center gap-2 px-1 py-2 border-b border-app-border bg-white h-16">
+        <button onclick="window.location.href='home.html'" aria-label="Go back"
+          class="w-12 h-12 flex items-center justify-center shrink-0 rounded-full active:bg-gray-100 transition-colors">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+              d="M16.966 5.25L10.216 12L16.966 18.75L15.375 20.341L7.034 12L15.375 3.659L16.966 5.25Z" fill="#1A1A1A"/>
+          </svg>
+        </button>
+        <span class="font-inter text-[18px] font-normal leading-[28px] tracking-[0.04px] text-app-heading">
+          Turf With Sports
+        </span>
+      </div>
+
+      <!-- ── Form ── -->
+      <div class="flex flex-col gap-4 px-5 pt-5 form-scroll-area">
+
+        <!-- Nickname -->
+        <div class="flex flex-col gap-2">
+          <label for="field-nickname" class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Nickname
+          </label>
+          <input id="field-nickname" type="text" placeholder="Nickname" onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors" />
+        </div>
+
+        <!-- Turf List -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Turf List
+          </label>
+          <div class="relative" id="turf-dropdown-wrapper">
+            <button id="turf-trigger" type="button" onclick="toggleTurfDropdown()"
+              class="w-full flex items-center justify-between h-[52px] px-3 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors">
+              <span id="turf-label" class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-placeholder">
+                Select Turf
+              </span>
+              <svg id="turf-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" class="shrink-0 transition-transform duration-200">
+                <path d="M6 9L12 15L18 9" stroke="#4D4D4D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div id="turf-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-20 shadow-lg overflow-hidden animate-fade-in"></div>
+          </div>
+        </div>
+
+        <!-- Sport ID -->
+        <div class="flex flex-col gap-2">
+          <label for="field-sportId" class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Sport id
+          </label>
+          <input id="field-sportId" type="text" placeholder="Sport id" onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors" />
+        </div>
+
+        <!-- Start Time -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Turf Start Time
+          </label>
+          <div class="relative" id="start-time-wrapper">
+            <button type="button" onclick="toggleTimeDropdown('start')"
+              class="w-full flex items-center justify-between h-[52px] px-3 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors">
+              <span id="start-time-label" class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-placeholder">
+                Select Start Time
+              </span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="shrink-0 transition-transform duration-200">
+                <circle cx="12" cy="12" r="9" stroke="#4d4d4d" stroke-width="1.5"/>
+                <path d="M12 7v5l3 3" stroke="#4d4d4d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div id="start-time-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-30 shadow-lg overflow-y-auto scrollbar-hide animate-fade-in time-menu"></div>
+          </div>
+        </div>
+
+        <!-- End Time -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Turf End Time
+          </label>
+          <div class="relative" id="end-time-wrapper">
+            <button type="button" onclick="toggleTimeDropdown('end')"
+              class="w-full flex items-center justify-between h-[52px] px-3 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors">
+              <span id="end-time-label" class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-placeholder">
+                Select End Time
+              </span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="shrink-0 transition-transform duration-200">
+                <circle cx="12" cy="12" r="9" stroke="#4d4d4d" stroke-width="1.5"/>
+                <path d="M12 7v5l3 3" stroke="#4d4d4d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div id="end-time-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-30 shadow-lg overflow-y-auto scrollbar-hide animate-fade-in time-menu"></div>
+          </div>
+        </div>
+
+        <!-- Sport Duration -->
+        <div class="flex flex-col gap-2">
+          <label for="field-duration" class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Sport Duration
+          </label>
+          <input id="field-duration" type="text" inputmode="numeric" placeholder="Sport Duration" onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors" />
+        </div>
+
+        <!-- Minimum Amount -->
+        <div class="flex flex-col gap-2">
+          <label for="field-minAmount" class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Minimum Amount
+          </label>
+          <input id="field-minAmount" type="text" inputmode="decimal" placeholder="Minimum Amount" onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors" />
+        </div>
+
+      </div><!-- /form -->
+
+      <!-- ── Sticky Bottom ── -->
+      <div class="sticky bottom-0 z-30 w-full px-5 py-4 border-t border-app-border bg-white">
+        <button id="btn-confirm" type="button" onclick="handleConfirm()"
+          class="w-full h-[52px] bg-app-btn text-white rounded-[8px] font-inter text-[16px] font-semibold leading-[24px] tracking-[0.04px] active:opacity-90 transition-opacity">
+          Confirm
+        </button>
+      </div>
+
+    </div><!-- /app -->
+
+    <script>
+      /* ═══════════════ TIME DROPDOWNS ═══════════════ */
+      const TIME_OPTIONS = [];
+      for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          const ampm  = h < 12 ? "AM" : "PM";
+          const hour  = h % 12 === 0 ? 12 : h % 12;
+          const min   = String(m).padStart(2, "0");
+          const label = `${hour}:${min} ${ampm}`;
+          const value = `${String(h).padStart(2,"0")}:${min}`; // 24h value for payload
+          TIME_OPTIONS.push({ label, value });
+        }
+      }
+
+      let selectedStartTime = { label: "", value: "" };
+      let selectedEndTime = { label: "", value: "" };
+      let startTimeOpen = false;
+      let endTimeOpen = false;
+
+      function buildTimeMenu(target) {
+        const menuId = target === 'start' ? 'start-time-menu' : 'end-time-menu';
+        const menu = document.getElementById(menuId);
+        menu.innerHTML = "";
+        const currentVal = target === 'start' ? selectedStartTime.value : selectedEndTime.value;
+
+        TIME_OPTIONS.forEach(opt => {
+          const isSel = opt.value === currentVal;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "w-full flex items-center justify-between px-4 py-3 h-[48px] font-roboto text-[16px] text-app-text hover:bg-gray-50 active:bg-gray-100 transition-colors" + (isSel ? " bg-gray-50" : "");
+          btn.innerHTML = `<span>${opt.label}</span>
+            <svg class="${isSel ? "" : "hidden"}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>`;
+          btn.onclick = () => selectTime(target, opt);
+          menu.appendChild(btn);
+        });
+        
+        // Scroll to selected option
+        setTimeout(() => {
+          const selectedIdx = TIME_OPTIONS.findIndex(o => o.value === currentVal);
+          if (selectedIdx > -1) {
+            menu.scrollTop = selectedIdx * 48;
+          }
+        }, 10);
+      }
+
+      function toggleTimeDropdown(target) {
+        const isStart = target === 'start';
+        if (isStart) {
+          startTimeOpen = !startTimeOpen;
+          endTimeOpen = false;
+          turfOpen = false;
+          document.getElementById('end-time-menu').classList.add('hidden');
+          document.getElementById('turf-menu').classList.add('hidden');
+          document.getElementById('turf-chevron').style.transform = "";
+        } else {
+          endTimeOpen = !endTimeOpen;
+          startTimeOpen = false;
+          turfOpen = false;
+          document.getElementById('start-time-menu').classList.add('hidden');
+          document.getElementById('turf-menu').classList.add('hidden');
+          document.getElementById('turf-chevron').style.transform = "";
+        }
+
+        const menuId = isStart ? 'start-time-menu' : 'end-time-menu';
+        const menu = document.getElementById(menuId);
+
+        if ((isStart && startTimeOpen) || (!isStart && endTimeOpen)) {
+          menu.classList.remove("hidden");
+          buildTimeMenu(target);
+        } else {
+          menu.classList.add("hidden");
+        }
+      }
+
+      function selectTime(target, opt) {
+        if (target === 'start') {
+          selectedStartTime = opt;
+          const lbl = document.getElementById("start-time-label");
+          lbl.textContent = opt.label;
+          lbl.style.color = "rgba(15,15,15,1)";
+          startTimeOpen = false;
+          document.getElementById("start-time-menu").classList.add("hidden");
+        } else {
+          selectedEndTime = opt;
+          const lbl = document.getElementById("end-time-label");
+          lbl.textContent = opt.label;
+          lbl.style.color = "rgba(15,15,15,1)";
+          endTimeOpen = false;
+          document.getElementById("end-time-menu").classList.add("hidden");
+        }
+      }
+
+      /* ═══════════════ SCROLL TO FIELD ═══════════════ */
+      function scrollToField(el) {
+        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 320);
+      }
+
+      /* ═══════════════ TURF DROPDOWN ═══════════════ */
+      const TURF_LIST = [
+        "Green Valley Turf", "City Sports Arena", "Sunrise Football Ground",
+        "Champions Cricket Turf", "Riverside Badminton Court", "Elite Sports Complex",
+      ];
+      let selectedTurf = "", turfOpen = false;
+
+      function buildTurfMenu() {
+        const menu = document.getElementById("turf-menu");
+        menu.innerHTML = "";
+        TURF_LIST.forEach(turf => {
+          const isSel = turf === selectedTurf;
+          const btn   = document.createElement("button");
+          btn.type    = "button";
+          btn.className = "w-full flex items-center justify-between px-4 py-3 font-roboto text-[16px] text-app-text hover:bg-gray-50 active:bg-gray-100 transition-colors" + (isSel ? " bg-gray-50" : "");
+          btn.innerHTML = `<span>${turf}</span>
+            <svg class="${isSel ? "" : "hidden"}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>`;
+          btn.onclick = () => selectTurf(turf);
+          menu.appendChild(btn);
+        });
+      }
+      function toggleTurfDropdown() {
+        turfOpen = !turfOpen;
+        
+        // close others
+        startTimeOpen = false;
+        endTimeOpen = false;
+        document.getElementById('start-time-menu').classList.add('hidden');
+        document.getElementById('end-time-menu').classList.add('hidden');
+
+        const menu = document.getElementById("turf-menu");
+        const chev = document.getElementById("turf-chevron");
+        if (turfOpen) { menu.classList.remove("hidden"); buildTurfMenu(); chev.style.transform = "rotate(180deg)"; }
+        else          { menu.classList.add("hidden");    chev.style.transform = ""; }
+      }
+      function selectTurf(turf) {
+        selectedTurf = turf;
+        const lbl = document.getElementById("turf-label");
+        lbl.textContent = turf;
+        lbl.style.color = "rgba(15,15,15,1)";
+        turfOpen = false;
+        document.getElementById("turf-menu").classList.add("hidden");
+        document.getElementById("turf-chevron").style.transform = "";
+      }
+      document.addEventListener("click", e => {
+        const sw = document.getElementById("start-time-wrapper");
+        if (sw && !sw.contains(e.target) && startTimeOpen) {
+          startTimeOpen = false;
+          document.getElementById("start-time-menu").classList.add("hidden");
+        }
+        const ew = document.getElementById("end-time-wrapper");
+        if (ew && !ew.contains(e.target) && endTimeOpen) {
+          endTimeOpen = false;
+          document.getElementById("end-time-menu").classList.add("hidden");
+        }
+        const tw = document.getElementById("turf-dropdown-wrapper");
+        if (tw && !tw.contains(e.target) && turfOpen) {
+          turfOpen = false;
+          document.getElementById("turf-menu").classList.add("hidden");
+          document.getElementById("turf-chevron").style.transform = "";
+        }
+      });
+
+      /* ═══════════════ CONFIRM ═══════════════ */
+      function handleConfirm() {
+        const payload = {
+          nickname:  document.getElementById("field-nickname").value.trim(),
+          turfList:  selectedTurf,
+          sportId:   document.getElementById("field-sportId").value.trim(),
+          startTime: selectedStartTime.value,
+          endTime:   selectedEndTime.value,
+          duration:  document.getElementById("field-duration").value.trim(),
+          minAmount: document.getElementById("field-minAmount").value.trim(),
+        };
+        console.log("Turf With Sports payload:", payload);
+        /* TODO: wire to API */
+      }
+    </script>
+  </body>
+</html>

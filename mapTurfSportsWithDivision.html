@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Map Turf Sports with Division – Fabzia Admin</title>
+    <meta name="description" content="Map a turf sport with division settings including length, width, players aside and parent unique reference." />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter + Roboto -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Utility CSS (design tokens) -->
+    <link rel="stylesheet" href="utility.css" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "app-bg":          "hsl(0,0%,96%)",
+              "app-heading":     "#1a1a1a",
+              "app-text":        "rgba(15,15,15,1)",
+              "app-sub":         "rgba(77,77,77,1)",
+              "app-placeholder": "rgba(171,171,171,1)",
+              "app-border":      "#d7d7d7",
+              "app-icon":        "#4d4d4d",
+              "app-btn":         "#125dcd",
+            },
+            fontFamily: {
+              inter:  ["Inter",  "sans-serif"],
+              roboto: ["Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* ── Animations ── */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in { animation: fadeIn 0.18s ease-out forwards; }
+
+      /* ── Scrollbar hide ── */
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+      /* ── Bottom padding so sticky button never covers content ── */
+      .form-scroll-area { padding-bottom: 88px; }
+
+      /* ── Focus border ── */
+      input:focus, textarea:focus, select:focus { border-color: #1a1a1a !important; outline: none; }
+
+      /* ── Toast ── */
+      #toast {
+        position: fixed;
+        bottom: 90px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #1a1a1a;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        white-space: nowrap;
+        z-index: 9999;
+      }
+      #toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    </style>
+  </head>
+
+  <body class="flex justify-center min-h-screen" style="background:hsl(0,0%,96%)">
+    <!-- ── Outer wrapper (max 430 px) ── -->
+    <div id="app" class="w-full max-w-[430px] min-h-screen flex flex-col" style="background:hsl(0,0%,96%)">
+
+      <!-- ── Sticky Nav Bar ── -->
+      <div class="sticky top-0 z-30 flex items-center gap-2 px-1 py-2 border-b border-app-border bg-white h-16">
+        <button
+          onclick="window.location.href='home.html'"
+          aria-label="Go back"
+          id="btn-back"
+          class="w-12 h-12 flex items-center justify-center shrink-0 rounded-full active:bg-gray-100 transition-colors"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+              d="M16.966 5.25L10.216 12L16.966 18.75L15.375 20.341L7.034 12L15.375 3.659L16.966 5.25Z"
+              fill="#1A1A1A"/>
+          </svg>
+        </button>
+        <span class="font-inter text-[18px] font-normal leading-[28px] tracking-[0.04px] text-app-heading">
+          Map Turf Sports with Division
+        </span>
+      </div>
+
+      <!-- ── Scrollable Form ── -->
+      <div class="flex-1 flex flex-col gap-4 px-5 pt-5 pb-[88px] overflow-y-auto scrollbar-hide">
+
+        <!-- Length -->
+        <div class="flex flex-col gap-2">
+          <label
+            for="field-length"
+            class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading"
+          >
+            Length
+          </label>
+          <input
+            id="field-length"
+            type="text"
+            inputmode="decimal"
+            placeholder="Length"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors"
+          />
+        </div>
+
+        <!-- Width -->
+        <div class="flex flex-col gap-2">
+          <label
+            for="field-width"
+            class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading"
+          >
+            Width
+          </label>
+          <input
+            id="field-width"
+            type="text"
+            inputmode="decimal"
+            placeholder="Width"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors"
+          />
+        </div>
+
+        <!-- PlayerAside -->
+        <div class="flex flex-col gap-2">
+          <label
+            for="field-playerAside"
+            class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading"
+          >
+            PlayerAside
+          </label>
+          <input
+            id="field-playerAside"
+            type="text"
+            inputmode="numeric"
+            placeholder="PlayerAside"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors"
+          />
+        </div>
+
+        <!-- Parent Unique Reference -->
+        <div class="flex flex-col gap-2">
+          <label
+            for="field-parentRef"
+            class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading"
+          >
+            Parent Unique Reference
+          </label>
+          <input
+            id="field-parentRef"
+            type="text"
+            placeholder="Parent Unique Reference"
+            onfocus="scrollToField(this)"
+            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors"
+          />
+        </div>
+
+      </div><!-- /form-scroll-area -->
+
+      <!-- ── Sticky Bottom Button ── -->
+      <div class="sticky bottom-0 z-30 w-full px-5 py-4 border-t border-app-border bg-white">
+        <button
+          id="btn-confirm"
+          type="button"
+          onclick="handleConfirm()"
+          class="w-full h-[52px] bg-app-btn text-white rounded-[8px] font-inter text-[16px] font-semibold leading-[24px] tracking-[0.04px] active:opacity-90 transition-opacity"
+        >
+          Confirm
+        </button>
+      </div>
+
+    </div><!-- /app -->
+
+    <!-- Toast -->
+    <div id="toast">Saved successfully!</div>
+
+    <script>
+      /* ═══════════════════════════════════════════════
+         SCROLL TO FIELD
+      ═══════════════════════════════════════════════ */
+      function scrollToField(el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 320);
+      }
+
+      /* ═══════════════════════════════════════════════
+         TOAST
+      ═══════════════════════════════════════════════ */
+      function showToast(msg) {
+        const toast = document.getElementById("toast");
+        toast.textContent = msg;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2500);
+      }
+
+      /* ═══════════════════════════════════════════════
+         VALIDATE
+      ═══════════════════════════════════════════════ */
+      function validate() {
+        const length    = document.getElementById("field-length").value.trim();
+        const width     = document.getElementById("field-width").value.trim();
+        const player    = document.getElementById("field-playerAside").value.trim();
+        const parentRef = document.getElementById("field-parentRef").value.trim();
+
+        if (!length)    { showToast("Please enter Length.");                   return false; }
+        if (!width)     { showToast("Please enter Width.");                    return false; }
+        if (!player)    { showToast("Please enter PlayerAside.");              return false; }
+        if (!parentRef) { showToast("Please enter Parent Unique Reference.");  return false; }
+        return true;
+      }
+
+      /* ═══════════════════════════════════════════════
+         CONFIRM
+      ═══════════════════════════════════════════════ */
+      function handleConfirm() {
+        if (!validate()) return;
+
+        const payload = {
+          length:    document.getElementById("field-length").value.trim(),
+          width:     document.getElementById("field-width").value.trim(),
+          playerAside: document.getElementById("field-playerAside").value.trim(),
+          parentUniqueReference: document.getElementById("field-parentRef").value.trim(),
+        };
+
+        console.log("Map Turf Sports with Division payload:", payload);
+        showToast("Mapped successfully!");
+        /* TODO: wire to API */
+      }
+    </script>
+  </body>
+</html>

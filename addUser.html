@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Add User – Fabzia Admin</title>
+    <meta name="description" content="Add a new user with role, contact details, sports preferences and company information." />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter + Roboto -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Utility CSS (design tokens) -->
+    <link rel="stylesheet" href="utility.css" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              /* Map CSS custom-property values so we can use them as Tailwind classes */
+              "app-bg":          "hsl(0,0%,96%)",
+              "app-heading":     "#0f172a",   /* --text-slate-900 / heading */
+              "app-text":        "#1a1a1a",   /* --text-primary */
+              "app-placeholder": "#ababab",   /* --text-placeholder */
+              "app-border":      "#d7d7d7",   /* --border-light / --slot-border-default */
+              "app-icon":        "#64748b",   /* --text-slate-500 */
+              "app-btn":         "#125dcd",   /* --primary-blue */
+            },
+            fontFamily: {
+              inter:  ["Inter",  "sans-serif"],
+              roboto: ["Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* ── Animations ── */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in { animation: fadeIn 0.18s ease-out forwards; }
+
+      /* ── Scrollbar hide ── */
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+      /* ── Remove number-input spinners ── */
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+      /* ── Ensure the bottom sticky area does not overlap last form field ── */
+      .form-scroll-area { padding-bottom: 80px; }
+    </style>
+  </head>
+
+  <body class="flex justify-center min-h-screen" style="background:hsl(0,0%,96%)">
+    <!-- ── Outer wrapper (max 430 px) ── -->
+    <div id="app" class="w-full max-w-[430px] min-h-screen flex flex-col relative" style="background:hsl(0,0%,96%)">
+
+      <!-- ── Sticky Nav Bar ── -->
+      <div class="sticky top-0 z-30 flex items-center gap-2 px-1 py-2 border-b border-app-border bg-white">
+        <button
+          id="btn-back"
+          onclick="window.location.href='home.html'"
+          aria-label="Go back"
+          class="w-12 h-12 flex items-center justify-center rounded-full active:bg-gray-100 transition-colors"
+        >
+          <!-- ChevronLeft icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+            class="text-app-heading" style="color:#0f172a">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <span class="font-inter text-[18px] font-normal leading-[28px] tracking-[0.04px] text-app-heading">
+          Add User
+        </span>
+      </div>
+
+      <!-- ── Success Banner (hidden by default) ── -->
+      <div
+        id="success-banner"
+        class="hidden mx-5 mt-4 px-4 py-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 animate-fade-in"
+        role="alert"
+      >
+        <!-- Check icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+          class="text-green-600 shrink-0" style="color:#16a34a">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        <p class="font-inter text-[14px] text-green-700">User added successfully!</p>
+      </div>
+
+      <!-- ── Scrollable Form ── -->
+      <div class="flex flex-col gap-5 px-5 pt-5 form-scroll-area">
+
+        <!-- User Role Dropdown -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            User Role
+          </label>
+          <div class="relative" id="role-dropdown-wrapper">
+            <button
+              id="role-trigger"
+              type="button"
+              onclick="toggleDropdown('role')"
+              class="w-full flex items-center justify-between h-[52px] px-3 py-2 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors"
+            >
+              <span
+                id="role-label"
+                class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-placeholder"
+              >
+                User Role
+              </span>
+              <!-- ChevronDown -->
+              <svg id="role-chevron" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                class="text-app-icon transition-transform duration-200 shrink-0" style="color:#64748b">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div
+              id="role-menu"
+              class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-20 shadow-lg overflow-hidden animate-fade-in"
+            >
+              <!-- Options injected by JS -->
+            </div>
+          </div>
+          <p id="error-userRole" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
+        </div>
+
+        <!-- User Name -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            User Name
+          </label>
+          <div id="wrap-userName" class="flex items-center h-[52px] px-3 py-2 rounded-[8px] border border-app-border bg-white">
+            <input
+              id="field-userName"
+              type="text"
+              placeholder="User Name"
+              oninput="handleInput('userName', this.value)"
+              onfocus="scrollToField(this)"
+              class="flex-1 font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none bg-transparent leading-[24px] tracking-[0.5px]"
+            />
+          </div>
+          <p id="error-userName" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
+        </div>
+
+        <!-- Email -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Email
+          </label>
+          <div id="wrap-email" class="flex items-center h-[52px] px-3 py-2 rounded-[8px] border border-app-border bg-white">
+            <input
+              id="field-email"
+              type="email"
+              placeholder="Email"
+              oninput="handleInput('email', this.value)"
+              onfocus="scrollToField(this)"
+              class="flex-1 font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none bg-transparent leading-[24px] tracking-[0.5px]"
+            />
+          </div>
+          <p id="error-email" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
+        </div>
+
+        <!-- Password -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Enter Password
+          </label>
+          <div id="wrap-password" class="flex items-center h-[52px] px-3 py-2 rounded-[8px] border border-app-border bg-white gap-3">
+            <input
+              id="field-password"
+              type="password"
+              placeholder="Password"
+              oninput="handleInput('password', this.value)"
+              onfocus="scrollToField(this)"
+              class="flex-1 font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none bg-transparent leading-[24px] tracking-[0.5px]"
+            />
+            <button
+              type="button"
+              id="toggle-password"
+              onclick="togglePassword()"
+              aria-label="Toggle password visibility"
+              class="shrink-0 p-1 rounded active:bg-gray-100 transition-colors"
+            >
+              <!-- Eye icon (shown when password hidden) -->
+              <svg id="icon-eye" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                class="text-app-icon" style="color:#64748b">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <!-- EyeOff icon (hidden initially) -->
+              <svg id="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                class="text-app-icon hidden" style="color:#64748b">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M17.94 17.94A10.06 10.06 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
+                <line x1="1" y1="1" x2="23" y2="23" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+          <p id="error-password" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
+        </div>
+
+        <!-- Phone Number -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Enter Phone number
+          </label>
+          <div id="wrap-phone" class="flex items-center h-[56px] px-3 py-2 rounded-[8px] border border-app-border bg-white gap-3">
+            <div class="flex items-center shrink-0 pr-3 border-r border-app-border">
+              <span class="font-roboto text-[16px] text-app-text leading-[24px] tracking-[0.5px]">+91</span>
+            </div>
+            <input
+              id="field-phone"
+              type="tel"
+              placeholder="Phone Number"
+              maxlength="10"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              oninput="handlePhoneInput(this)"
+              onpaste="handlePhonePaste(event)"
+              onfocus="scrollToField(this)"
+              class="flex-1 font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none bg-transparent leading-[24px] tracking-[0.5px]"
+            />
+          </div>
+          <p id="error-phone" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
+        </div>
+
+        <!-- OTP -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Otp
+          </label>
+          <div id="wrap-otp" class="flex items-center h-[52px] px-3 py-2 rounded-[8px] border border-app-border bg-white">
+            <input
+              id="field-otp"
+              type="tel"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              placeholder="Otp"
+              oninput="handleInput('otp', this.value)"
+              onfocus="scrollToField(this)"
+              class="flex-1 font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none bg-transparent leading-[24px] tracking-[0.5px]"
+            />
+          </div>
+          <p id="error-otp" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
+        </div>
+
+        <!-- Sports Multi-Select Dropdown -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Sports
+          </label>
+          <div class="relative" id="sports-dropdown-wrapper">
+            <button
+              id="sports-trigger"
+              type="button"
+              onclick="toggleDropdown('sports')"
+              class="w-full flex items-start justify-between min-h-[52px] px-3 py-2 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors"
+            >
+              <div id="sports-chips" class="flex flex-wrap gap-1 flex-1 text-left py-1">
+                <span class="font-roboto text-[16px] text-app-placeholder leading-[24px]">Sports</span>
+              </div>
+              <svg id="sports-chevron" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                class="text-app-icon ml-2 shrink-0 mt-1 transition-transform duration-200" style="color:#64748b">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <div
+              id="sports-menu"
+              class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-20 shadow-lg overflow-hidden animate-fade-in max-h-64 overflow-y-auto scrollbar-hide"
+            >
+              <!-- Options injected by JS -->
+            </div>
+          </div>
+          <p id="error-sports" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
+        </div>
+
+        <!-- GST Number -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Gst Number
+          </label>
+          <div id="wrap-gstNumber" class="flex items-center h-[52px] px-3 py-2 rounded-[8px] border border-app-border bg-white">
+            <input
+              id="field-gstNumber"
+              type="text"
+              placeholder="Gst Number"
+              oninput="handleInput('gstNumber', this.value)"
+              onfocus="scrollToField(this)"
+              class="flex-1 font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none bg-transparent leading-[24px] tracking-[0.5px]"
+            />
+          </div>
+          <p id="error-gstNumber" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
+        </div>
+
+        <!-- Company Name -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Company Name
+          </label>
+          <div id="wrap-companyName" class="flex items-center h-[52px] px-3 py-2 rounded-[8px] border border-app-border bg-white">
+            <input
+              id="field-companyName"
+              type="text"
+              placeholder="Company Name"
+              oninput="handleInput('companyName', this.value)"
+              onfocus="scrollToField(this)"
+              class="flex-1 font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none bg-transparent leading-[24px] tracking-[0.5px]"
+            />
+          </div>
+          <p id="error-companyName" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
+        </div>
+
+        <!-- Company Address -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
+            Company Address
+          </label>
+          <textarea
+            id="field-companyAddress"
+            placeholder="Company Address"
+            rows="4"
+            oninput="handleInput('companyAddress', this.value)"
+            onfocus="scrollToField(this)"
+            class="w-full px-3 py-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none bg-white leading-[24px] tracking-[0.5px] resize-none"
+          ></textarea>
+          <p id="error-companyAddress" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
+        </div>
+
+      </div><!-- /form-scroll-area -->
+
+      <!-- ── Sticky Bottom Button ── -->
+      <div class="sticky bottom-0 z-30 w-full px-5 py-4 border-t border-app-border" style="background:hsl(0,0%,96%)">
+        <button
+          id="btn-submit"
+          type="button"
+          onclick="handleSubmit()"
+          class="w-full h-[52px] bg-app-btn text-white rounded-[8px] font-inter text-[16px] font-semibold leading-[24px] tracking-[0.04px] active:opacity-90 transition-opacity"
+        >
+          Add User
+        </button>
+      </div>
+
+    </div><!-- /app -->
+
+    <script>
+      /* ═══════════════════════════════════════════════
+         DATA
+      ═══════════════════════════════════════════════ */
+      const SPORTS = [
+        "Cricket","Football","Basketball","Tennis","Badminton",
+        "Swimming","Hockey","Volleyball","Table Tennis","Athletics",
+      ];
+      const USER_ROLES = ["Admin", "Vendor"];
+
+      /* ═══════════════════════════════════════════════
+         STATE
+      ═══════════════════════════════════════════════ */
+      const state = {
+        userRole:       "",
+        userName:       "",
+        email:          "",
+        password:       "",
+        phone:          "",
+        otp:            "",
+        sports:         [],
+        gstNumber:      "",
+        companyName:    "",
+        companyAddress: "",
+      };
+
+      let submitted    = false;
+      let roleOpen     = false;
+      let sportsOpen   = false;
+      let showPasswd   = false;
+
+      /* ═══════════════════════════════════════════════
+         INIT DROPDOWNS
+      ═══════════════════════════════════════════════ */
+      function buildRoleMenu() {
+        const menu = document.getElementById("role-menu");
+        menu.innerHTML = "";
+        USER_ROLES.forEach((role) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.id   = `role-opt-${role}`;
+          btn.className =
+            "w-full flex items-center justify-between px-4 py-3 font-roboto text-[16px] text-app-text hover:bg-gray-50 active:bg-gray-100 transition-colors" +
+            (state.userRole === role ? " bg-gray-50" : "");
+          btn.innerHTML = `
+            <span>${role}</span>
+            <svg id="role-check-${role}"
+              xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"
+              class="${state.userRole === role ? "" : "hidden"}" style="color:#0f172a">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>`;
+          btn.onclick = () => selectRole(role);
+          menu.appendChild(btn);
+        });
+      }
+
+      function buildSportsMenu() {
+        const menu = document.getElementById("sports-menu");
+        menu.innerHTML = "";
+        SPORTS.forEach((sport) => {
+          const selected = state.sports.includes(sport);
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.id   = `sport-opt-${sport.replace(/\s+/g, "-")}`;
+          btn.className =
+            "w-full flex items-center justify-between px-4 py-3 font-roboto text-[16px] text-app-text hover:bg-gray-50 active:bg-gray-100 transition-colors" +
+            (selected ? " bg-gray-50" : "");
+          btn.innerHTML = `
+            <span>${sport}</span>
+            <div class="w-5 h-5 rounded flex items-center justify-center border transition-colors
+              ${selected ? "bg-app-btn border-app-btn" : "border-app-border"}"
+              style="${selected ? "background-color:#125dcd;border-color:#125dcd;" : ""}">
+              ${selected
+                ? `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none"
+                      viewBox="0 0 24 24" stroke="white" stroke-width="3">
+                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                   </svg>`
+                : ""}
+            </div>`;
+          btn.onclick = () => toggleSport(sport);
+          menu.appendChild(btn);
+        });
+      }
+
+      /* ═══════════════════════════════════════════════
+         DROPDOWN TOGGLE
+      ═══════════════════════════════════════════════ */
+      function toggleDropdown(name) {
+        if (name === "role") {
+          roleOpen = !roleOpen;
+          sportsOpen = false;
+          updateSportsMenuVisibility();
+          updateRoleMenuVisibility();
+        } else {
+          sportsOpen = !sportsOpen;
+          roleOpen = false;
+          updateRoleMenuVisibility();
+          updateSportsMenuVisibility();
+        }
+      }
+
+      function updateRoleMenuVisibility() {
+        const menu    = document.getElementById("role-menu");
+        const chevron = document.getElementById("role-chevron");
+        if (roleOpen) {
+          menu.classList.remove("hidden");
+          buildRoleMenu();
+          chevron.style.transform = "rotate(180deg)";
+        } else {
+          menu.classList.add("hidden");
+          chevron.style.transform = "";
+        }
+      }
+
+      function updateSportsMenuVisibility() {
+        const menu    = document.getElementById("sports-menu");
+        const chevron = document.getElementById("sports-chevron");
+        if (sportsOpen) {
+          menu.classList.remove("hidden");
+          buildSportsMenu();
+          chevron.style.transform = "rotate(180deg)";
+        } else {
+          menu.classList.add("hidden");
+          chevron.style.transform = "";
+        }
+      }
+
+      /* Close dropdowns when clicking outside */
+      document.addEventListener("click", (e) => {
+        const roleWrapper   = document.getElementById("role-dropdown-wrapper");
+        const sportsWrapper = document.getElementById("sports-dropdown-wrapper");
+        if (!roleWrapper.contains(e.target) && roleOpen) {
+          roleOpen = false;
+          updateRoleMenuVisibility();
+        }
+        if (!sportsWrapper.contains(e.target) && sportsOpen) {
+          sportsOpen = false;
+          updateSportsMenuVisibility();
+        }
+      });
+
+      /* ═══════════════════════════════════════════════
+         ROLE SELECT
+      ═══════════════════════════════════════════════ */
+      function selectRole(role) {
+        state.userRole = role;
+        const label = document.getElementById("role-label");
+        label.textContent = role;
+        label.classList.remove("text-app-placeholder");
+        label.classList.add("text-app-text");
+        roleOpen = false;
+        updateRoleMenuVisibility();
+        if (submitted) validateField("userRole");
+      }
+
+      /* ═══════════════════════════════════════════════
+         SPORTS TOGGLE
+      ═══════════════════════════════════════════════ */
+      function toggleSport(sport) {
+        const idx = state.sports.indexOf(sport);
+        if (idx === -1) {
+          state.sports.push(sport);
+        } else {
+          state.sports.splice(idx, 1);
+        }
+        renderSportsChips();
+        buildSportsMenu(); /* refresh checkboxes */
+        if (submitted) validateField("sports");
+      }
+
+      function renderSportsChips() {
+        const chips = document.getElementById("sports-chips");
+        chips.innerHTML = "";
+        if (state.sports.length === 0) {
+          chips.innerHTML = `<span class="font-roboto text-[16px] text-app-placeholder leading-[24px]">Sports</span>`;
+        } else {
+          state.sports.forEach((s) => {
+            const span = document.createElement("span");
+            span.className =
+              "inline-flex items-center bg-gray-100 text-app-text text-[13px] font-roboto px-2 py-0.5 rounded-full";
+            span.textContent = s;
+            chips.appendChild(span);
+          });
+        }
+      }
+
+      /* ═══════════════════════════════════════════════
+         PASSWORD TOGGLE
+      ═══════════════════════════════════════════════ */
+      function togglePassword() {
+        showPasswd = !showPasswd;
+        const input  = document.getElementById("field-password");
+        const eye    = document.getElementById("icon-eye");
+        const eyeOff = document.getElementById("icon-eye-off");
+        input.type = showPasswd ? "text" : "password";
+        if (showPasswd) {
+          eye.classList.add("hidden");
+          eyeOff.classList.remove("hidden");
+        } else {
+          eye.classList.remove("hidden");
+          eyeOff.classList.add("hidden");
+        }
+      }
+
+      /* ═══════════════════════════════════════════════
+         PHONE INPUT
+      ═══════════════════════════════════════════════ */
+      function handlePhoneInput(input) {
+        const digits = input.value.replace(/\D/g, "").slice(0, 10);
+        input.value = digits;
+        state.phone = digits;
+        if (submitted) validateField("phone");
+      }
+
+      function handlePhonePaste(e) {
+        e.preventDefault();
+        let pasted = e.clipboardData.getData("text");
+        if (pasted.startsWith("+91")) pasted = pasted.slice(3);
+        else if (pasted.startsWith("91") && pasted.length > 10) pasted = pasted.slice(2);
+        const digits = pasted.replace(/\D/g, "").slice(0, 10);
+        const input = document.getElementById("field-phone");
+        input.value = digits;
+        state.phone = digits;
+        if (submitted) validateField("phone");
+      }
+
+      /* ═══════════════════════════════════════════════
+         GENERIC INPUT
+      ═══════════════════════════════════════════════ */
+      function handleInput(field, value) {
+        state[field] = value;
+        if (submitted) validateField(field);
+      }
+
+      /* ═══════════════════════════════════════════════
+         SCROLL INTO VIEW ON FOCUS
+         Ensures the focused field sits comfortably above
+         the soft keyboard on mobile browsers.
+      ═══════════════════════════════════════════════ */
+      function scrollToField(el) {
+        /* Small delay so the keyboard has started rising before we scroll */
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 320);
+      }
+
+      /* ═══════════════════════════════════════════════
+         VALIDATION
+      ═══════════════════════════════════════════════ */
+      const FIELD_LABELS = {
+        userRole:       "User Role",
+        userName:       "User Name",
+        email:          "Email",
+        password:       "Password",
+        phone:          "Phone number",
+        otp:            "OTP",
+        sports:         "Sports",
+        gstNumber:      "GST Number",
+        companyName:    "Company Name",
+        companyAddress: "Company Address",
+      };
+
+      function validateField(field) {
+        let errorMsg = "";
+        if (field === "sports") {
+          if (state.sports.length === 0) errorMsg = "Please select at least one sport";
+        } else {
+          const val = (state[field] || "").trim();
+          if (!val) errorMsg = FIELD_LABELS[field] + " is required";
+        }
+        showError(field, errorMsg);
+        /* highlight border for wrap elements */
+        applyBorderError(field, !!errorMsg);
+        return !errorMsg;
+      }
+
+      function validateAll() {
+        let allValid = true;
+        const fields = ["userRole","userName","email","password","phone","otp","sports","gstNumber","companyName","companyAddress"];
+        fields.forEach((f) => {
+          const ok = validateField(f);
+          if (!ok) allValid = false;
+        });
+        return allValid;
+      }
+
+      function showError(field, message) {
+        const el = document.getElementById(`error-${field}`);
+        if (!el) return;
+        if (message) {
+          el.textContent = message;
+          el.classList.remove("hidden");
+        } else {
+          el.textContent = "";
+          el.classList.add("hidden");
+        }
+      }
+
+      function applyBorderError(field, hasError) {
+        const errorBorder = "border-red-500";
+        const defaultBorder = "border-app-border";
+
+        /* special cases */
+        if (field === "userRole") {
+          const trigger = document.getElementById("role-trigger");
+          if (trigger) setBorder(trigger, hasError, errorBorder, defaultBorder);
+          return;
+        }
+        if (field === "sports") {
+          const trigger = document.getElementById("sports-trigger");
+          if (trigger) setBorder(trigger, hasError, errorBorder, defaultBorder);
+          return;
+        }
+        if (field === "companyAddress") {
+          const ta = document.getElementById("field-companyAddress");
+          if (ta) setBorder(ta, hasError, errorBorder, defaultBorder);
+          return;
+        }
+        const wrap = document.getElementById(`wrap-${field}`);
+        if (wrap) setBorder(wrap, hasError, errorBorder, defaultBorder);
+      }
+
+      function setBorder(el, hasError, errorClass, defaultClass) {
+        if (hasError) {
+          el.classList.add(errorClass);
+          el.classList.remove(defaultClass);
+        } else {
+          el.classList.remove(errorClass);
+          el.classList.add(defaultClass);
+        }
+      }
+
+      /* ═══════════════════════════════════════════════
+         SUBMIT
+      ═══════════════════════════════════════════════ */
+      function handleSubmit() {
+        submitted = true;
+        const valid = validateAll();
+        if (valid) {
+          const banner = document.getElementById("success-banner");
+          banner.classList.remove("hidden");
+          banner.classList.add("flex");
+          banner.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+    </script>
+  </body>
+</html>
