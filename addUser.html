@@ -246,108 +246,22 @@
           <p id="error-phone" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
         </div>
 
-        <!-- OTP -->
+
+
+        <!-- User Address -->
         <div class="flex flex-col gap-2">
           <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
-            Otp
-          </label>
-          <div id="wrap-otp" class="flex items-center h-[52px] px-3 py-2 rounded-[8px] border border-app-border bg-white">
-            <input
-              id="field-otp"
-              type="tel"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              placeholder="Otp"
-              oninput="handleInput('otp', this.value)"
-              onfocus="scrollToField(this)"
-              class="flex-1 font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none bg-transparent leading-[24px] tracking-[0.5px]"
-            />
-          </div>
-          <p id="error-otp" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
-        </div>
-
-        <!-- Sports Multi-Select Dropdown -->
-        <div class="flex flex-col gap-2">
-          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
-            Sports
-          </label>
-          <div class="relative" id="sports-dropdown-wrapper">
-            <button
-              id="sports-trigger"
-              type="button"
-              onclick="toggleDropdown('sports')"
-              class="w-full flex items-start justify-between min-h-[52px] px-3 py-2 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors"
-            >
-              <div id="sports-chips" class="flex flex-wrap gap-1 flex-1 text-left py-1">
-                <span class="font-roboto text-[16px] text-app-placeholder leading-[24px]">Sports</span>
-              </div>
-              <svg id="sports-chevron" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-                class="text-app-icon ml-2 shrink-0 mt-1 transition-transform duration-200" style="color:#64748b">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            <div
-              id="sports-menu"
-              class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-20 shadow-lg overflow-hidden animate-fade-in max-h-64 overflow-y-auto scrollbar-hide"
-            >
-              <!-- Options injected by JS -->
-            </div>
-          </div>
-          <p id="error-sports" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
-        </div>
-
-        <!-- GST Number -->
-        <div class="flex flex-col gap-2">
-          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
-            Gst Number
-          </label>
-          <div id="wrap-gstNumber" class="flex items-center h-[52px] px-3 py-2 rounded-[8px] border border-app-border bg-white">
-            <input
-              id="field-gstNumber"
-              type="text"
-              placeholder="Gst Number"
-              oninput="handleInput('gstNumber', this.value)"
-              onfocus="scrollToField(this)"
-              class="flex-1 font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none bg-transparent leading-[24px] tracking-[0.5px]"
-            />
-          </div>
-          <p id="error-gstNumber" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
-        </div>
-
-        <!-- Company Name -->
-        <div class="flex flex-col gap-2">
-          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
-            Company Name
-          </label>
-          <div id="wrap-companyName" class="flex items-center h-[52px] px-3 py-2 rounded-[8px] border border-app-border bg-white">
-            <input
-              id="field-companyName"
-              type="text"
-              placeholder="Company Name"
-              oninput="handleInput('companyName', this.value)"
-              onfocus="scrollToField(this)"
-              class="flex-1 font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none bg-transparent leading-[24px] tracking-[0.5px]"
-            />
-          </div>
-          <p id="error-companyName" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
-        </div>
-
-        <!-- Company Address -->
-        <div class="flex flex-col gap-2">
-          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">
-            Company Address
+            User Address
           </label>
           <textarea
-            id="field-companyAddress"
-            placeholder="Company Address"
+            id="field-userAddress"
+            placeholder="User Address"
             rows="4"
-            oninput="handleInput('companyAddress', this.value)"
+            oninput="handleInput('userAddress', this.value)"
             onfocus="scrollToField(this)"
             class="w-full px-3 py-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none bg-white leading-[24px] tracking-[0.5px] resize-none"
           ></textarea>
-          <p id="error-companyAddress" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
+          <p id="error-userAddress" class="hidden font-inter text-[12px] text-red-500 leading-[16px] animate-fade-in"></p>
         </div>
 
       </div><!-- /form-scroll-area -->
@@ -370,11 +284,7 @@
       /* ═══════════════════════════════════════════════
          DATA
       ═══════════════════════════════════════════════ */
-      const SPORTS = [
-        "Cricket","Football","Basketball","Tennis","Badminton",
-        "Swimming","Hockey","Volleyball","Table Tennis","Athletics",
-      ];
-      const USER_ROLES = ["Admin", "Vendor"];
+      const USER_ROLES = ["ADMIN", "VENDOR"];
 
       /* ═══════════════════════════════════════════════
          STATE
@@ -385,16 +295,11 @@
         email:          "",
         password:       "",
         phone:          "",
-        otp:            "",
-        sports:         [],
-        gstNumber:      "",
-        companyName:    "",
-        companyAddress: "",
+        userAddress:    "",
       };
 
       let submitted    = false;
       let roleOpen     = false;
-      let sportsOpen   = false;
       let showPasswd   = false;
 
       /* ═══════════════════════════════════════════════
@@ -423,33 +328,7 @@
         });
       }
 
-      function buildSportsMenu() {
-        const menu = document.getElementById("sports-menu");
-        menu.innerHTML = "";
-        SPORTS.forEach((sport) => {
-          const selected = state.sports.includes(sport);
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.id   = `sport-opt-${sport.replace(/\s+/g, "-")}`;
-          btn.className =
-            "w-full flex items-center justify-between px-4 py-3 font-roboto text-[16px] text-app-text hover:bg-gray-50 active:bg-gray-100 transition-colors" +
-            (selected ? " bg-gray-50" : "");
-          btn.innerHTML = `
-            <span>${sport}</span>
-            <div class="w-5 h-5 rounded flex items-center justify-center border transition-colors
-              ${selected ? "bg-app-btn border-app-btn" : "border-app-border"}"
-              style="${selected ? "background-color:#125dcd;border-color:#125dcd;" : ""}">
-              ${selected
-                ? `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none"
-                      viewBox="0 0 24 24" stroke="white" stroke-width="3">
-                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                   </svg>`
-                : ""}
-            </div>`;
-          btn.onclick = () => toggleSport(sport);
-          menu.appendChild(btn);
-        });
-      }
+
 
       /* ═══════════════════════════════════════════════
          DROPDOWN TOGGLE
@@ -457,14 +336,7 @@
       function toggleDropdown(name) {
         if (name === "role") {
           roleOpen = !roleOpen;
-          sportsOpen = false;
-          updateSportsMenuVisibility();
           updateRoleMenuVisibility();
-        } else {
-          sportsOpen = !sportsOpen;
-          roleOpen = false;
-          updateRoleMenuVisibility();
-          updateSportsMenuVisibility();
         }
       }
 
@@ -481,30 +353,12 @@
         }
       }
 
-      function updateSportsMenuVisibility() {
-        const menu    = document.getElementById("sports-menu");
-        const chevron = document.getElementById("sports-chevron");
-        if (sportsOpen) {
-          menu.classList.remove("hidden");
-          buildSportsMenu();
-          chevron.style.transform = "rotate(180deg)";
-        } else {
-          menu.classList.add("hidden");
-          chevron.style.transform = "";
-        }
-      }
-
       /* Close dropdowns when clicking outside */
       document.addEventListener("click", (e) => {
-        const roleWrapper   = document.getElementById("role-dropdown-wrapper");
-        const sportsWrapper = document.getElementById("sports-dropdown-wrapper");
+        const roleWrapper = document.getElementById("role-dropdown-wrapper");
         if (!roleWrapper.contains(e.target) && roleOpen) {
           roleOpen = false;
           updateRoleMenuVisibility();
-        }
-        if (!sportsWrapper.contains(e.target) && sportsOpen) {
-          sportsOpen = false;
-          updateSportsMenuVisibility();
         }
       });
 
@@ -522,36 +376,7 @@
         if (submitted) validateField("userRole");
       }
 
-      /* ═══════════════════════════════════════════════
-         SPORTS TOGGLE
-      ═══════════════════════════════════════════════ */
-      function toggleSport(sport) {
-        const idx = state.sports.indexOf(sport);
-        if (idx === -1) {
-          state.sports.push(sport);
-        } else {
-          state.sports.splice(idx, 1);
-        }
-        renderSportsChips();
-        buildSportsMenu(); /* refresh checkboxes */
-        if (submitted) validateField("sports");
-      }
 
-      function renderSportsChips() {
-        const chips = document.getElementById("sports-chips");
-        chips.innerHTML = "";
-        if (state.sports.length === 0) {
-          chips.innerHTML = `<span class="font-roboto text-[16px] text-app-placeholder leading-[24px]">Sports</span>`;
-        } else {
-          state.sports.forEach((s) => {
-            const span = document.createElement("span");
-            span.className =
-              "inline-flex items-center bg-gray-100 text-app-text text-[13px] font-roboto px-2 py-0.5 rounded-full";
-            span.textContent = s;
-            chips.appendChild(span);
-          });
-        }
-      }
 
       /* ═══════════════════════════════════════════════
          PASSWORD TOGGLE
@@ -622,21 +447,14 @@
         email:          "Email",
         password:       "Password",
         phone:          "Phone number",
-        otp:            "OTP",
-        sports:         "Sports",
-        gstNumber:      "GST Number",
-        companyName:    "Company Name",
-        companyAddress: "Company Address",
+        userAddress:    "User Address",
       };
 
       function validateField(field) {
         let errorMsg = "";
-        if (field === "sports") {
-          if (state.sports.length === 0) errorMsg = "Please select at least one sport";
-        } else {
-          const val = (state[field] || "").trim();
-          if (!val) errorMsg = FIELD_LABELS[field] + " is required";
-        }
+        const val = (state[field] || "").trim();
+        if (!val) errorMsg = FIELD_LABELS[field] + " is required";
+        
         showError(field, errorMsg);
         /* highlight border for wrap elements */
         applyBorderError(field, !!errorMsg);
@@ -645,7 +463,7 @@
 
       function validateAll() {
         let allValid = true;
-        const fields = ["userRole","userName","email","password","phone","otp","sports","gstNumber","companyName","companyAddress"];
+        const fields = ["userRole","userName","email","password","phone","userAddress"];
         fields.forEach((f) => {
           const ok = validateField(f);
           if (!ok) allValid = false;
@@ -675,13 +493,8 @@
           if (trigger) setBorder(trigger, hasError, errorBorder, defaultBorder);
           return;
         }
-        if (field === "sports") {
-          const trigger = document.getElementById("sports-trigger");
-          if (trigger) setBorder(trigger, hasError, errorBorder, defaultBorder);
-          return;
-        }
-        if (field === "companyAddress") {
-          const ta = document.getElementById("field-companyAddress");
+        if (field === "userAddress") {
+          const ta = document.getElementById("field-userAddress");
           if (ta) setBorder(ta, hasError, errorBorder, defaultBorder);
           return;
         }

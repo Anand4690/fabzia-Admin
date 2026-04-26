@@ -104,50 +104,6 @@
           />
         </div>
 
-        <!-- Turf Image URL -->
-        <div class="flex flex-col gap-2">
-          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Turf Image url</label>
-          <div class="flex flex-col gap-2">
-            <!-- URL rows container -->
-            <div id="image-url-list" class="flex flex-col gap-2">
-              <!-- first row -->
-              <div class="image-url-row flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="example.com"
-                  onfocus="scrollToField(this)"
-                  class="image-url-input flex-1 h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
-                />
-                <!-- remove btn: hidden when only one row -->
-                <button
-                  type="button"
-                  onclick="removeImageRow(this)"
-                  aria-label="Remove image URL"
-                  class="img-remove-btn hidden w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-50 active:bg-red-100 transition-colors shrink-0"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color:#6b7280">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <!-- Add more images button -->
-            <button
-              type="button"
-              onclick="addImageRow()"
-              class="flex items-center gap-2 h-[52px] px-3 rounded-[8px] border border-app-border bg-app-field-bg w-full active:opacity-80 transition-opacity"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="#1A1A1A" />
-              </svg>
-              <span class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text">
-                Add more Images
-              </span>
-            </button>
-          </div>
-        </div>
-
         <!-- Turf Address -->
         <div class="flex flex-col gap-2">
           <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Turf Address</label>
@@ -232,45 +188,6 @@
           </div>
         </div>
 
-        <!-- Length -->
-        <div class="flex flex-col gap-2">
-          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Length</label>
-          <input
-            id="field-length"
-            type="text"
-            inputmode="decimal"
-            placeholder="Length"
-            onfocus="scrollToField(this)"
-            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
-          />
-        </div>
-
-        <!-- Width -->
-        <div class="flex flex-col gap-2">
-          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Width</label>
-          <input
-            id="field-width"
-            type="text"
-            inputmode="decimal"
-            placeholder="Width"
-            onfocus="scrollToField(this)"
-            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
-          />
-        </div>
-
-        <!-- Height -->
-        <div class="flex flex-col gap-2">
-          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Height</label>
-          <input
-            id="field-height"
-            type="text"
-            inputmode="decimal"
-            placeholder="Height"
-            onfocus="scrollToField(this)"
-            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
-          />
-        </div>
-
         <!-- Turf Description -->
         <div class="flex flex-col gap-2">
           <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Turf Description</label>
@@ -296,16 +213,56 @@
           />
         </div>
 
-        <!-- GST Number -->
-        <div class="flex flex-col gap-2">
-          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Gst Number</label>
-          <input
-            id="field-gstNumber"
-            type="text"
-            placeholder="Gst Number"
-            onfocus="scrollToField(this)"
-            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
-          />
+        <!-- GST Details -->
+        <div class="flex flex-col gap-4">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <div class="relative flex items-center justify-center">
+              <input type="checkbox" id="checkbox-hasGst" class="peer sr-only" onchange="toggleGstFields()" />
+              <div class="w-5 h-5 rounded-[4px] border-2 border-app-border bg-white peer-checked:bg-app-btn peer-checked:border-app-btn transition-colors flex items-center justify-center">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" class="opacity-0 peer-checked:opacity-100 transition-opacity">
+                  <path d="M10 3L4.5 8.5L2 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <span class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">I have the gst number</span>
+          </label>
+
+          <div id="gst-fields-container" class="hidden flex-col gap-4 animate-fade-in">
+            <!-- Registration Number -->
+            <div class="flex flex-col gap-2">
+              <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Registration Number</label>
+              <input
+                id="field-registrationNumber"
+                type="text"
+                placeholder="Registration Number"
+                onfocus="scrollToField(this)"
+                class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
+              />
+            </div>
+            <!-- Company Name -->
+            <div class="flex flex-col gap-2">
+              <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Company Name</label>
+              <input
+                id="field-companyName"
+                type="text"
+                placeholder="Company Name"
+                onfocus="scrollToField(this)"
+                class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white transition-colors"
+              />
+            </div>
+            <!-- Address -->
+            <div class="flex flex-col gap-2">
+              <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Address</label>
+              <textarea
+                id="field-gstAddress"
+                placeholder="Address"
+                rows="4"
+                onfocus="scrollToField(this)"
+                class="w-full px-3 py-2 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder outline-none bg-white resize-none transition-colors"
+                style="height:124px"
+              ></textarea>
+            </div>
+          </div>
         </div>
 
         <!-- Booking Mode -->
@@ -317,7 +274,7 @@
               type="button"
               data-mode="Online"
               onclick="selectBookingMode('Online')"
-              class="booking-mode-btn flex items-center gap-2 h-12 px-3 rounded-[8px] border border-app-border transition-colors active:opacity-80"
+              class="booking-mode-btn bg-white flex items-center gap-2 h-12 px-3 rounded-[8px] border border-app-border transition-colors active:opacity-80"
             >
               <!-- Radio icon injected by JS -->
               <span class="booking-mode-radio shrink-0"></span>
@@ -328,21 +285,12 @@
               type="button"
               data-mode="Offline"
               onclick="selectBookingMode('Offline')"
-              class="booking-mode-btn flex items-center gap-2 h-12 px-3 rounded-[8px] border border-app-heading transition-colors active:opacity-80"
+              class="booking-mode-btn bg-white flex items-center gap-2 h-12 px-3 rounded-[8px] border border-app-heading transition-colors active:opacity-80"
             >
               <span class="booking-mode-radio shrink-0"></span>
               <span class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] booking-mode-label text-app-text">Offline</span>
             </button>
 
-            <button
-              type="button"
-              data-mode="Telephonic"
-              onclick="selectBookingMode('Telephonic')"
-              class="booking-mode-btn flex items-center gap-2 h-12 px-3 rounded-[8px] border border-app-border transition-colors active:opacity-80"
-            >
-              <span class="booking-mode-radio shrink-0"></span>
-              <span class="font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] booking-mode-label text-app-sub">Telephonic</span>
-            </button>
           </div>
         </div>
 
@@ -391,69 +339,18 @@
       }
 
       /* ═══════════════════════════════════════════════
-         ADD IMAGE URL ROW
+         GST FIELDS TOGGLE
       ═══════════════════════════════════════════════ */
-      /* ── Build one image-URL row (wrapper div + input + remove btn) ── */
-      function createImageRow() {
-        const row = document.createElement("div");
-        row.className = "image-url-row flex items-center gap-2";
-
-        const input = document.createElement("input");
-        input.type        = "text";
-        input.placeholder = "example.com";
-        input.className   =
-          "image-url-input flex-1 h-[52px] px-3 rounded-[8px] border border-app-border font-roboto " +
-          "text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text " +
-          "placeholder:text-app-placeholder outline-none bg-white transition-colors";
-        input.addEventListener("focus", () => scrollToField(input));
-
-        const rmBtn = document.createElement("button");
-        rmBtn.type      = "button";
-        rmBtn.setAttribute("aria-label", "Remove image URL");
-        rmBtn.className =
-          "img-remove-btn w-10 h-10 flex items-center justify-center rounded-full " +
-          "bg-gray-100 hover:bg-red-50 active:bg-red-100 transition-colors shrink-0";
-        rmBtn.innerHTML =
-          `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color:#6b7280">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>`;
-        rmBtn.onclick = () => removeImageRow(rmBtn);
-
-        row.appendChild(input);
-        row.appendChild(rmBtn);
-        return { row, input };
-      }
-
-      function addImageRow() {
-        const list        = document.getElementById("image-url-list");
-        const { row, input } = createImageRow();
-        list.appendChild(row);
-        syncRemoveButtons();
-        setTimeout(() => { input.focus(); scrollToField(input); }, 50);
-      }
-
-      function removeImageRow(btn) {
-        const list = document.getElementById("image-url-list");
-        /* btn could be the × button itself or its parent row */
-        const row = btn.closest(".image-url-row");
-        if (!row) return;
-        /* Don't remove if it's the only row */
-        if (list.querySelectorAll(".image-url-row").length <= 1) return;
-        row.remove();
-        syncRemoveButtons();
-      }
-
-      /* Show remove btn only when multiple rows exist */
-      function syncRemoveButtons() {
-        const list = document.getElementById("image-url-list");
-        const rows = list.querySelectorAll(".image-url-row");
-        rows.forEach((r) => {
-          const btn = r.querySelector(".img-remove-btn");
-          if (!btn) return;
-          if (rows.length > 1) btn.classList.remove("hidden");
-          else                  btn.classList.add("hidden");
-        });
+      function toggleGstFields() {
+        const container = document.getElementById("gst-fields-container");
+        const checkbox = document.getElementById("checkbox-hasGst");
+        if (checkbox.checked) {
+          container.classList.remove("hidden");
+          container.classList.add("flex");
+        } else {
+          container.classList.add("hidden");
+          container.classList.remove("flex");
+        }
       }
 
       /* ═══════════════════════════════════════════════
@@ -599,21 +496,20 @@
       ═══════════════════════════════════════════════ */
       function handleSubmit() {
         /* Gather values */
-        const urls = [...document.querySelectorAll(".image-url-input")].map((i) => i.value.trim()).filter(Boolean);
+        const hasGst = document.getElementById("checkbox-hasGst").checked;
         const payload = {
           turfName:        document.getElementById("field-turfName").value.trim(),
-          imageUrls:       urls,
           turfAddress:     document.getElementById("field-turfAddress").value.trim(),
           googleLink:      document.getElementById("field-googleLink").value.trim(),
           latitude:        document.getElementById("field-latitude").value.trim(),
           longitude:       document.getElementById("field-longitude").value.trim(),
           amenities:       selectedAmenities,
-          length:          document.getElementById("field-length").value.trim(),
-          width:           document.getElementById("field-width").value.trim(),
-          height:          document.getElementById("field-height").value.trim(),
           description:     document.getElementById("field-turfDescription").value.trim(),
           clubName:        document.getElementById("field-clubName").value.trim(),
-          gstNumber:       document.getElementById("field-gstNumber").value.trim(),
+          hasGst:          hasGst,
+          registrationNumber: hasGst ? document.getElementById("field-registrationNumber").value.trim() : "",
+          companyName:       hasGst ? document.getElementById("field-companyName").value.trim() : "",
+          gstAddress:        hasGst ? document.getElementById("field-gstAddress").value.trim() : "",
           bookingMode,
         };
         console.log("Add Turf payload:", payload);
