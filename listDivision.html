@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>List Division – Fabzia Admin</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter + Roboto -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+    
+    <!-- Utility CSS -->
+    <link rel="stylesheet" href="utility.css" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "app-bg":          "hsl(0,0%,96%)",
+              "app-heading":     "#1a1a1a",
+              "app-text":        "rgba(15,15,15,1)",
+              "app-sub":         "rgba(77,77,77,1)",
+              "app-placeholder": "rgba(171,171,171,1)",
+              "app-border":      "#d7d7d7",
+              "app-icon":        "#4d4d4d",
+              "app-btn":         "#125dcd",
+            },
+            fontFamily: {
+              inter:  ["Inter",  "sans-serif"],
+              roboto: ["Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* Animations */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in { animation: fadeIn 0.18s ease-out forwards; }
+
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      .form-scroll-area { padding-bottom: 88px; }
+      input:focus, textarea:focus, select:focus { border-color: #1a1a1a !important; outline: none; }
+
+      /* BOTTOM SHEETS */
+      .bs-overlay { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.45); display:none; align-items:flex-end; justify-content:center; }
+      .bs-overlay.open { display:flex; }
+      .bs-panel { position:relative; width:100%; max-width:430px; background:#fff; border-radius:20px 20px 0 0; animation:bsSlideUp 0.3s cubic-bezier(0.4,0,0.2,1); max-height: 80vh; display: flex; flex-direction: column; }
+      @keyframes bsSlideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+
+      .check-box { width:24px; height:24px; border-radius:4px; border:1.5px solid #d7d7d7; display:flex; align-items:center; justify-content:center; cursor: pointer; transition: all 0.2s; }
+      .check-box.active { border-color:#125dcd; background:#125dcd; }
+
+      /* Time Grid */
+      .time-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; max-height: 250px; overflow-y: auto; padding-right: 4px; }
+      .time-cell { text-align:center; padding:10px 4px; font-size:14px; cursor:pointer; border-radius:8px; border: 1px solid #d7d7d7; color: #1a1a1a; font-weight: 500; font-family: 'Roboto', sans-serif;}
+      .time-cell.selected { background:#125dcd; border-color:#125dcd; color:#fff; }
+
+      /* Toast */
+      #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease; white-space: nowrap; z-index: 9999; }
+      #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+  </head>
+
+  <body class="flex justify-center min-h-screen" style="background:hsl(0,0%,96%)">
+    <div id="app" class="w-full max-w-[430px] min-h-screen flex flex-col" style="background:hsl(0,0%,96%)">
+
+      <!-- Top Nav -->
+      <div class="sticky top-0 z-30 flex items-center gap-2 px-1 py-2 border-b border-app-border bg-white h-16">
+        <button onclick="handleCancelClick()" aria-label="Go back" class="w-12 h-12 flex items-center justify-center shrink-0 rounded-full active:bg-gray-100 transition-colors">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M16.966 5.25L10.216 12L16.966 18.75L15.375 20.341L7.034 12L15.375 3.659L16.966 5.25Z" fill="#1A1A1A"/>
+          </svg>
+        </button>
+        <span class="font-inter text-[18px] font-normal leading-[28px] tracking-[0.04px] text-app-heading">
+          List Division
+        </span>
+      </div>
+
+      <!-- Form Content -->
+      <div class="flex-1 flex flex-col gap-4 px-5 pt-5 pb-[88px] overflow-y-auto scrollbar-hide">
+
+        <!-- Venue Sports -->
+        <div class="flex flex-col gap-2 w-full">
+            <label class="font-inter text-[14px] font-semibold text-app-heading">Venue Sports</label>
+            <div class="border border-app-border flex items-center px-3 h-[52px] rounded-[8px] w-full bg-white relative cursor-pointer" onclick="openBS('sports-select')">
+                <input type="text" id="sports-display" readonly placeholder="Select Sports" class="w-full h-full font-roboto text-[16px] font-normal text-app-text outline-none bg-transparent placeholder:text-app-placeholder pointer-events-none border-none focus:ring-0 cursor-pointer">
+                <div class="absolute right-3 pointer-events-none text-app-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- List Division -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold text-app-heading">List Division</label>
+          <input id="field-listDivision" type="text" placeholder="Enter Division" oninput="markDirty()" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text placeholder:text-app-placeholder bg-white transition-colors focus:border-app-btn focus:ring-1 focus:ring-app-btn" />
+        </div>
+
+        <!-- Player Aside -->
+        <div class="flex flex-col gap-2">
+          <label class="font-inter text-[14px] font-semibold text-app-heading">Player Aside</label>
+          <input id="field-playerAside" type="text" inputmode="numeric" placeholder="Enter Player Aside" oninput="markDirty()" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text placeholder:text-app-placeholder bg-white transition-colors focus:border-app-btn focus:ring-1 focus:ring-app-btn" />
+        </div>
+
+        <!-- Day of Week -->
+        <div class="flex flex-col gap-2 w-full">
+            <label class="font-inter text-[14px] font-semibold text-app-heading">Day of Week</label>
+            <div class="border border-app-border flex items-center px-3 h-[52px] rounded-[8px] w-full bg-white relative cursor-pointer" onclick="openBS('days-select')">
+                <input type="text" id="days-display" readonly placeholder="Select Days" class="w-full h-full font-roboto text-[16px] font-normal text-app-text outline-none bg-transparent placeholder:text-app-placeholder pointer-events-none border-none focus:ring-0 cursor-pointer">
+                <div class="absolute right-3 pointer-events-none text-app-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Days Container -->
+        <div id="dynamic-days-container" class="flex flex-col gap-3 mt-1 empty:hidden"></div>
+
+      </div>
+
+      <!-- Bottom Actions -->
+      <div class="sticky bottom-0 z-30 w-full px-5 py-4 border-t border-app-border bg-white">
+        <div class="flex items-center gap-3">
+          <button onclick="handleCancelClick()" class="flex-1 flex justify-center items-center rounded-[8px] h-[52px] text-app-heading font-inter font-semibold text-[16px] border border-app-border bg-white active:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+          <button onclick="handleSave()" class="flex-1 flex justify-center items-center rounded-[8px] h-[52px] bg-app-btn text-white font-inter font-semibold text-[16px] active:opacity-90 transition-opacity">
+            Save changes
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         BOTTOM SHEETS
+    ═══════════════════════════════════════ -->
+    
+    <!-- Sports Select Sheet -->
+    <div id="bs-sports-select" class="bs-overlay" onclick="closeBS('sports-select')">
+        <div class="bs-panel" onclick="event.stopPropagation()">
+            <div class="flex justify-center pt-3 pb-1"><div class="w-10 h-1 rounded-full bg-gray-200"></div></div>
+            <div class="flex items-center justify-between px-5 py-2 border-b border-app-border">
+                <h3 class="text-[16px] font-semibold text-app-heading font-inter">Select Sports</h3>
+                <button onclick="closeBS('sports-select')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-app-heading"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div class="flex-1 overflow-y-auto px-2 py-2" id="sports-list"></div>
+            <div class="p-4 border-t border-app-border mt-auto">
+                <button onclick="applySportsSelect()" class="w-full h-[52px] rounded-[8px] bg-app-btn text-white font-inter font-semibold text-[16px] active:opacity-90 transition-opacity">
+                    Confirm Selection
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Days Select Sheet -->
+    <div id="bs-days-select" class="bs-overlay" onclick="closeBS('days-select')">
+        <div class="bs-panel" onclick="event.stopPropagation()">
+            <div class="flex justify-center pt-3 pb-1"><div class="w-10 h-1 rounded-full bg-gray-200"></div></div>
+            <div class="flex items-center justify-between px-5 py-2 border-b border-app-border">
+                <h3 class="text-[16px] font-semibold text-app-heading font-inter">Select Days</h3>
+                <button onclick="closeBS('days-select')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-app-heading"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div class="flex-1 overflow-y-auto px-2 py-2" id="days-list"></div>
+            <div class="p-4 border-t border-app-border mt-auto">
+                <button onclick="applyDaysSelect()" class="w-full h-[52px] rounded-[8px] bg-app-btn text-white font-inter font-semibold text-[16px] active:opacity-90 transition-opacity">
+                    Confirm Selection
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pure Time Picker Sheet -->
+    <div id="bs-pure-time-select" class="bs-overlay" onclick="closeBS('pure-time-select')" style="z-index: 105;">
+        <div class="bs-panel" onclick="event.stopPropagation()">
+            <div class="flex justify-center pt-3 pb-1"><div class="w-10 h-1 rounded-full bg-gray-200"></div></div>
+            <div class="flex items-center justify-between px-5 py-2 border-b border-app-border">
+                <h3 class="text-[16px] font-semibold text-app-heading font-inter">Select Time</h3>
+                <button onclick="closeBS('pure-time-select')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-app-heading"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div class="p-5 flex-1 overflow-y-auto">
+                <div class="time-grid" id="pure-time-list"></div>
+            </div>
+            <div class="p-4 border-t border-app-border mt-auto">
+                <button onclick="applyPureTime()" class="w-full h-[52px] rounded-[8px] bg-app-btn text-white font-inter font-semibold text-[16px] active:opacity-90 transition-opacity">
+                    Confirm Time
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Confirm Sheet -->
+    <div id="bs-cancel-confirm" class="bs-overlay" onclick="closeBS('cancel-confirm')" style="z-index: 105;">
+        <div class="bs-panel !rounded-t-[20px] !max-h-auto" onclick="event.stopPropagation()">
+            <div class="p-6 flex flex-col gap-4">
+                <h3 class="text-[18px] font-semibold text-app-heading text-left font-inter">Are you sure you want to cancel changes?</h3>
+                <div class="flex items-center gap-3 mt-2">
+                    <button onclick="closeBS('cancel-confirm')" class="flex-1 h-[48px] rounded-[8px] text-app-heading font-semibold text-[16px] font-inter border border-app-border active:bg-gray-50 transition-colors">
+                        No
+                    </button>
+                    <button onclick="window.location.href='home.html'" class="flex-1 h-[48px] rounded-[8px] bg-[#ef4444] text-white font-semibold text-[16px] font-inter active:opacity-90 transition-colors">
+                        Cancel Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Message -->
+    <div id="toast">Saved successfully!</div>
+
+    <script>
+      let isDirty = false;
+      function markDirty() { isDirty = true; }
+
+      function openBS(id) { document.getElementById('bs-' + id).classList.add('open'); }
+      function closeBS(id) { document.getElementById('bs-' + id).classList.remove('open'); }
+
+      function handleCancelClick() {
+          if (isDirty) openBS('cancel-confirm');
+          else window.location.href = 'home.html';
+      }
+
+      function showToast(msg) {
+          const toast = document.getElementById("toast");
+          toast.textContent = msg;
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 2500);
+      }
+
+      /* Sports Selection */
+      const sportsList = ["Cricket", "Football", "Tennis", "Basketball", "Badminton"];
+      const selectedSports = new Set();
+      function renderSports() {
+          const list = document.getElementById('sports-list');
+          list.innerHTML = '';
+          sportsList.forEach(sport => {
+              const isSelected = selectedSports.has(sport);
+              const el = document.createElement('div');
+              el.className = 'flex items-center justify-between px-3 py-3 hover:bg-gray-50 cursor-pointer rounded-lg mb-1';
+              el.onclick = () => {
+                  isSelected ? selectedSports.delete(sport) : selectedSports.add(sport);
+                  markDirty();
+                  renderSports();
+              };
+              el.innerHTML = `
+                  <span class="text-[15px] text-app-text font-medium font-roboto">${sport}</span>
+                  <div class="check-box ${isSelected ? 'active' : ''}">
+                      ${isSelected ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M20 6 9 17l-5-5"/></svg>' : ''}
+                  </div>
+              `;
+              list.appendChild(el);
+          });
+      }
+      function applySportsSelect() {
+          const display = document.getElementById('sports-display');
+          display.value = selectedSports.size === 0 ? '' : selectedSports.size === 1 ? Array.from(selectedSports)[0] : `${selectedSports.size} Sports Selected`;
+          closeBS('sports-select');
+      }
+      renderSports();
+
+      /* Days Selection */
+      const daysArr = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      let selectedDays = [];
+      function renderDays() {
+          const list = document.getElementById('days-list');
+          list.innerHTML = '';
+          daysArr.forEach(day => {
+              const isSelected = selectedDays.includes(day);
+              const el = document.createElement('div');
+              el.className = 'flex items-center justify-between px-3 py-3 hover:bg-gray-50 cursor-pointer rounded-lg mb-1';
+              el.onclick = () => {
+                  if (isSelected) {
+                      selectedDays = selectedDays.filter(d => d !== day);
+                  } else {
+                      selectedDays.push(day);
+                  }
+                  markDirty();
+                  renderDays();
+              };
+              el.innerHTML = `
+                  <span class="text-[15px] text-app-text font-medium font-roboto">${day}</span>
+                  <div class="check-box ${isSelected ? 'active' : ''}">
+                      ${isSelected ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M20 6 9 17l-5-5"/></svg>' : ''}
+                  </div>
+              `;
+              list.appendChild(el);
+          });
+      }
+      function applyDaysSelect() {
+          const display = document.getElementById('days-display');
+          display.value = selectedDays.length === 0 ? '' : selectedDays.map(d => d.substring(0,3)).join(', ');
+          renderDynamicDays();
+          closeBS('days-select');
+      }
+      renderDays();
+
+      /* Dynamic Days UI */
+      const dayData = {};
+      function updateDayData(day, field, value) {
+          if (!dayData[day]) dayData[day] = {};
+          dayData[day][field] = value;
+          markDirty();
+      }
+
+      function renderDynamicDays() {
+          const container = document.getElementById('dynamic-days-container');
+          container.innerHTML = '';
+          
+          selectedDays.forEach(day => {
+              const dData = dayData[day] || {};
+              const startTime = dData.start || '';
+              const endTime = dData.end || '';
+              const amount = dData.amount || '';
+
+              const section = document.createElement('div');
+              section.className = 'border border-app-border rounded-xl p-4 bg-white shadow-sm flex flex-col gap-4 animate-fade-in mt-1';
+              section.innerHTML = `
+                  <div class="flex items-center justify-between border-b border-app-border pb-2">
+                      <span class="font-inter text-[16px] font-semibold text-app-heading">${day}</span>
+                  </div>
+                  
+                  <div class="flex flex-col gap-3">
+                      <!-- Times -->
+                      <div class="flex items-center gap-3 w-full">
+                          <div class="flex flex-col gap-1 flex-1">
+                              <label class="text-[13px] text-app-sub font-semibold font-inter">Start Time</label>
+                              <div class="border border-app-border rounded-[8px] h-[48px] flex items-center px-3 cursor-pointer bg-white" onclick="openTimePicker('${day}', 'start')">
+                                  <input type="text" id="${day}-start-display" value="${startTime}" readonly placeholder="Select" class="w-full font-roboto text-[14px] text-app-text bg-transparent outline-none pointer-events-none text-center">
+                              </div>
+                          </div>
+                          <div class="flex flex-col gap-1 flex-1">
+                              <label class="text-[13px] text-app-sub font-semibold font-inter">End Time</label>
+                              <div class="border border-app-border rounded-[8px] h-[48px] flex items-center px-3 cursor-pointer bg-white" onclick="openTimePicker('${day}', 'end')">
+                                  <input type="text" id="${day}-end-display" value="${endTime}" readonly placeholder="Select" class="w-full font-roboto text-[14px] text-app-text bg-transparent outline-none pointer-events-none text-center">
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <!-- Amount -->
+                      <div class="flex flex-col gap-1 w-full">
+                          <label class="text-[13px] text-app-sub font-semibold font-inter">Turf Amount</label>
+                          <div class="border border-app-border flex items-center px-3 h-[48px] rounded-[8px] w-full bg-white gap-2 transition-colors focus-within:border-app-btn focus-within:ring-1 focus-within:ring-app-btn">
+                              <span class="text-[15px] text-app-sub font-medium border-r border-app-border pr-2 w-[30px] text-center">₹</span>
+                              <input type="number" value="${amount}" min="0" oninput="updateDayData('${day}', 'amount', this.value)" placeholder="Enter Amount" class="w-full h-full font-roboto text-[15px] outline-none text-app-text bg-transparent placeholder:text-app-placeholder border-none focus:ring-0">
+                          </div>
+                      </div>
+                  </div>
+              `;
+              container.appendChild(section);
+          });
+      }
+
+      /* Time Picker */
+      let pureTimeEditingDay = null;
+      let pureTimeEditingField = null; // 'start' | 'end'
+      let selectedPureTime = null;
+
+      function openTimePicker(day, field) {
+          pureTimeEditingDay = day;
+          pureTimeEditingField = field;
+          selectedPureTime = dayData[day] ? dayData[day][field] : null;
+          renderPureTimeList();
+          openBS('pure-time-select');
+      }
+
+      function renderPureTimeList() {
+          const timeList = document.getElementById('pure-time-list');
+          let timeHtml = '';
+          const times = ["06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"];
+          times.forEach((t) => {
+              const isSelected = selectedPureTime === t;
+              timeHtml += `<div class="time-cell ${isSelected ? 'selected' : ''}" onclick="selectPureTime(this, '${t}')">${t}</div>`;
+          });
+          timeList.innerHTML = timeHtml;
+      }
+
+      function selectPureTime(el, timeStr) {
+          document.querySelectorAll('#pure-time-list .time-cell').forEach(c => c.classList.remove('selected'));
+          el.classList.add('selected');
+          selectedPureTime = timeStr;
+      }
+
+      function applyPureTime() {
+          if(selectedPureTime) {
+              updateDayData(pureTimeEditingDay, pureTimeEditingField, selectedPureTime);
+              const inputId = `${pureTimeEditingDay}-${pureTimeEditingField}-display`;
+              if (document.getElementById(inputId)) {
+                  document.getElementById(inputId).value = selectedPureTime;
+              }
+          }
+          closeBS('pure-time-select');
+      }
+
+      /* Save Validation */
+      function handleSave() {
+          if (selectedSports.size === 0) { showToast("Please select Venue Sports"); return; }
+          if (!document.getElementById("field-listDivision").value.trim()) { showToast("Please enter Division"); return; }
+          if (!document.getElementById("field-playerAside").value.trim()) { showToast("Please enter Player Aside"); return; }
+          if (selectedDays.length === 0) { showToast("Please select Days"); return; }
+          
+          for (const day of selectedDays) {
+              const data = dayData[day] || {};
+              if (!data.start) { showToast(`Please select start time for ${day}`); return; }
+              if (!data.end) { showToast(`Please select end time for ${day}`); return; }
+              if (!data.amount) { showToast(`Please enter amount for ${day}`); return; }
+          }
+          
+          showToast("Saved successfully!");
+          setTimeout(() => { window.location.href = 'home.html'; }, 800);
+      }
+    </script>
+  </body>
+</html>

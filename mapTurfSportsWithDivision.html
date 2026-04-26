@@ -61,6 +61,15 @@
       /* ── Focus border ── */
       input:focus, textarea:focus, select:focus { border-color: #1a1a1a !important; outline: none; }
 
+      /* BOTTOM SHEETS */
+      .bs-overlay { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.45); display:none; align-items:flex-end; justify-content:center; }
+      .bs-overlay.open { display:flex; }
+      .bs-panel { position:relative; width:100%; max-width:430px; background:#fff; border-radius:20px 20px 0 0; animation:bsSlideUp 0.3s cubic-bezier(0.4,0,0.2,1); max-height: 80vh; display: flex; flex-direction: column; }
+      @keyframes bsSlideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+
+      .check-box { width:24px; height:24px; border-radius:4px; border:1.5px solid #d7d7d7; display:flex; align-items:center; justify-content:center; cursor: pointer; transition: all 0.2s; }
+      .check-box.active { border-color:#125dcd; background:#125dcd; }
+
       /* ── Toast ── */
       #toast {
         position: fixed;
@@ -93,7 +102,7 @@
       <!-- ── Sticky Nav Bar ── -->
       <div class="sticky top-0 z-30 flex items-center gap-2 px-1 py-2 border-b border-app-border bg-white h-16">
         <button
-          onclick="window.location.href='home.html'"
+          onclick="handleBackClick()"
           aria-label="Go back"
           id="btn-back"
           class="w-12 h-12 flex items-center justify-center shrink-0 rounded-full active:bg-gray-100 transition-colors"
@@ -112,92 +121,138 @@
       <!-- ── Scrollable Form ── -->
       <div class="flex-1 flex flex-col gap-4 px-5 pt-5 pb-[88px] overflow-y-auto scrollbar-hide">
 
+        <!-- Turf Selection -->
+        <div class="flex flex-col gap-2 w-full">
+            <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Select Turf</label>
+            <div id="turf-container" class="border border-app-border flex items-center px-3 h-[52px] rounded-[8px] w-full bg-white relative cursor-pointer" onclick="openBS('turf-select')">
+                <input type="text" id="turf-display" readonly placeholder="Select Turf" class="w-full h-full font-roboto text-[16px] font-normal text-app-text outline-none bg-transparent placeholder:text-app-placeholder pointer-events-none border-none focus:ring-0 cursor-pointer">
+                <div class="absolute right-3 pointer-events-none text-app-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sport ID -->
+        <div class="flex flex-col gap-2 w-full relative" id="sport-id-container">
+            <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Sport ID</label>
+            <div class="border border-app-border flex items-center px-3 h-[52px] rounded-[8px] w-full bg-white relative cursor-pointer focus-within:border-app-heading transition-colors" onclick="toggleSportDropdown()">
+                <input type="text" id="sport-id-display" readonly placeholder="Select Sport" class="w-full h-full font-roboto text-[16px] font-normal text-app-text outline-none bg-transparent placeholder:text-app-placeholder pointer-events-none border-none focus:ring-0 cursor-pointer">
+                <input type="hidden" id="sport-id" value="">
+                <div class="absolute right-3 pointer-events-none text-app-icon transition-transform duration-200" id="sport-id-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+            </div>
+            <!-- Custom Dropdown Menu -->
+            <div id="sport-id-menu" class="absolute top-[82px] left-0 right-0 bg-white border border-app-border rounded-[8px] shadow-lg z-20 overflow-hidden hidden animate-fade-in origin-top">
+                <div class="max-h-[200px] overflow-y-auto flex flex-col scrollbar-hide">
+                    <button type="button" onclick="selectSport('001', 'Cricket ( id : 001 )', event)" class="w-full text-left px-4 py-3 hover:bg-gray-50 active:bg-gray-100 font-roboto text-[15px] border-b border-app-border text-app-text transition-colors">Cricket ( id : 001 )</button>
+                    <button type="button" onclick="selectSport('002', 'Football ( id : 002 )', event)" class="w-full text-left px-4 py-3 hover:bg-gray-50 active:bg-gray-100 font-roboto text-[15px] border-b border-app-border text-app-text transition-colors">Football ( id : 002 )</button>
+                    <button type="button" onclick="selectSport('003', 'Tennis ( id : 003 )', event)" class="w-full text-left px-4 py-3 hover:bg-gray-50 active:bg-gray-100 font-roboto text-[15px] text-app-text transition-colors">Tennis ( id : 003 )</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Length -->
         <div class="flex flex-col gap-2">
-          <label
-            for="field-length"
-            class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading"
-          >
-            Length
-          </label>
-          <input
-            id="field-length"
-            type="text"
-            inputmode="decimal"
-            placeholder="Length"
-            onfocus="scrollToField(this)"
-            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors"
-          />
+          <label for="field-length" class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Length</label>
+          <input id="field-length" type="text" inputmode="decimal" placeholder="Length" oninput="markDirty()" onfocus="scrollToField(this)" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors" />
         </div>
 
         <!-- Width -->
         <div class="flex flex-col gap-2">
-          <label
-            for="field-width"
-            class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading"
-          >
-            Width
-          </label>
-          <input
-            id="field-width"
-            type="text"
-            inputmode="decimal"
-            placeholder="Width"
-            onfocus="scrollToField(this)"
-            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors"
-          />
+          <label for="field-width" class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Width</label>
+          <input id="field-width" type="text" inputmode="decimal" placeholder="Width" oninput="markDirty()" onfocus="scrollToField(this)" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors" />
         </div>
 
         <!-- PlayerAside -->
         <div class="flex flex-col gap-2">
-          <label
-            for="field-playerAside"
-            class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading"
-          >
-            PlayerAside
-          </label>
-          <input
-            id="field-playerAside"
-            type="text"
-            inputmode="numeric"
-            placeholder="PlayerAside"
-            onfocus="scrollToField(this)"
-            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors"
-          />
+          <label for="field-playerAside" class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">PlayerAside</label>
+          <input id="field-playerAside" type="text" inputmode="numeric" placeholder="PlayerAside" oninput="markDirty()" onfocus="scrollToField(this)" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors" />
         </div>
 
         <!-- Parent Unique Reference -->
         <div class="flex flex-col gap-2">
-          <label
-            for="field-parentRef"
-            class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading"
-          >
-            Parent Unique Reference
-          </label>
-          <input
-            id="field-parentRef"
-            type="text"
-            placeholder="Parent Unique Reference"
-            onfocus="scrollToField(this)"
-            class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors"
-          />
+          <label for="field-parentRef" class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Parent Unique Reference</label>
+          <input id="field-parentRef" type="text" placeholder="Parent Unique Reference" oninput="markDirty()" onfocus="scrollToField(this)" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors" />
+        </div>
+
+        <!-- Division Side Type -->
+        <div class="flex flex-col gap-2">
+          <label for="field-divSideType" class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Division Side Type</label>
+          <input id="field-divSideType" type="text" placeholder="Division Side Type" oninput="markDirty()" onfocus="scrollToField(this)" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors" />
+        </div>
+
+        <!-- Division Priority Sequence -->
+        <div class="flex flex-col gap-2">
+          <label for="field-divPriority" class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Division Priority Sequence</label>
+          <input id="field-divPriority" type="text" placeholder="Division Priority Sequence" oninput="markDirty()" onfocus="scrollToField(this)" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors" />
+        </div>
+
+        <!-- Division Image url -->
+        <div class="flex flex-col gap-2">
+          <label for="field-divImageUrl" class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Division Image url</label>
+          <input id="field-divImageUrl" type="text" placeholder="Division Image url" oninput="markDirty()" onfocus="scrollToField(this)" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors" />
         </div>
 
       </div><!-- /form-scroll-area -->
 
-      <!-- ── Sticky Bottom Button ── -->
+      <!-- ── Sticky Bottom Action Buttons ── -->
       <div class="sticky bottom-0 z-30 w-full px-5 py-4 border-t border-app-border bg-white">
-        <button
-          id="btn-confirm"
-          type="button"
-          onclick="handleConfirm()"
-          class="w-full h-[52px] bg-app-btn text-white rounded-[8px] font-inter text-[16px] font-semibold leading-[24px] tracking-[0.04px] active:opacity-90 transition-opacity"
-        >
-          Confirm
-        </button>
+        <div class="flex items-center gap-3">
+          <button onclick="handleCancelClick()" class="flex-1 flex justify-center items-center rounded-[8px] h-[52px] text-app-heading font-inter font-semibold text-[16px] border border-app-border bg-white active:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+          <button onclick="handleSave()" class="flex-1 flex justify-center items-center rounded-[8px] h-[52px] bg-app-btn text-white font-inter font-semibold text-[16px] active:opacity-90 transition-opacity">
+            Save changes
+          </button>
+        </div>
       </div>
 
     </div><!-- /app -->
+
+    <!-- ═══════════════════════════════════════
+         BOTTOM SHEETS
+    ═══════════════════════════════════════ -->
+
+    <!-- Turf Selection Sheet -->
+    <div id="bs-turf-select" class="bs-overlay" onclick="closeBS('turf-select')">
+        <div class="bs-panel !h-[70vh] !max-h-[70vh]" onclick="event.stopPropagation()">
+            <!-- Handle bar -->
+            <div class="flex justify-center pt-3 pb-1">
+              <div class="w-10 h-1 rounded-full bg-gray-200"></div>
+            </div>
+            <div class="flex items-center justify-between px-5 py-2 border-b border-app-border">
+                <h3 class="text-[16px] font-semibold text-app-heading font-inter">Select Turf</h3>
+                <button onclick="closeBS('turf-select')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-app-heading"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="px-5 py-3 border-b border-app-border">
+                <div class="border border-app-border rounded-lg flex items-center px-3 h-[40px] bg-gray-50 focus-within:border-app-btn focus-within:bg-white transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-app-placeholder"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" id="turf-search" oninput="renderTurfs()" placeholder="Search Turf" class="w-full h-full bg-transparent outline-none ml-2 text-[14px] text-app-text font-roboto">
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto px-2 py-2 no-scrollbar" id="turf-list"></div>
+        </div>
+    </div>
+
+    <!-- Save Changes Confirmation Sheet -->
+    <div id="bs-save-confirm" class="bs-overlay" onclick="closeBS('save-confirm')" style="z-index: 105;">
+        <div class="bs-panel !rounded-t-[20px] !max-h-auto" onclick="event.stopPropagation()">
+            <div class="p-6 flex flex-col gap-4">
+                <h3 class="text-[18px] font-semibold text-app-heading text-left font-inter">Do you want to save changes?</h3>
+                <div class="flex items-center gap-3 mt-2">
+                    <button onclick="discardAndGoHome()" class="flex-1 h-[48px] rounded-[8px] text-app-heading font-semibold text-[16px] font-inter border border-app-border active:bg-gray-50 transition-colors">
+                        No
+                    </button>
+                    <button onclick="saveAndGoHome()" class="flex-1 h-[48px] rounded-[8px] bg-app-btn text-white font-semibold text-[16px] font-inter active:opacity-90 transition-colors">
+                        Yes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast -->
     <div id="toast">Saved successfully!</div>
@@ -223,37 +278,191 @@
       }
 
       /* ═══════════════════════════════════════════════
+         SPORT DROPDOWN LOGIC
+      ═══════════════════════════════════════════════ */
+      function toggleSportDropdown() {
+          const menu = document.getElementById('sport-id-menu');
+          const icon = document.getElementById('sport-id-icon');
+          if (menu.classList.contains('hidden')) {
+              menu.classList.remove('hidden');
+              icon.style.transform = 'rotate(180deg)';
+          } else {
+              menu.classList.add('hidden');
+              icon.style.transform = 'rotate(0deg)';
+          }
+      }
+
+      function selectSport(val, label, event) {
+          event.stopPropagation();
+          document.getElementById('sport-id').value = val;
+          document.getElementById('sport-id-display').value = label;
+          document.getElementById('sport-id-menu').classList.add('hidden');
+          document.getElementById('sport-id-icon').style.transform = 'rotate(0deg)';
+          markDirty();
+      }
+
+      document.addEventListener('click', (e) => {
+          if (!e.target.closest('#sport-id-container')) {
+              const menu = document.getElementById('sport-id-menu');
+              const icon = document.getElementById('sport-id-icon');
+              if (menu && !menu.classList.contains('hidden')) {
+                  menu.classList.add('hidden');
+                  icon.style.transform = 'rotate(0deg)';
+              }
+          }
+      });
+
+      /* ═══════════════════════════════════════════════
+         STATE & BOTTOM SHEET LOGIC
+      ═══════════════════════════════════════════════ */
+      let isDirty = false;
+      function markDirty() { isDirty = true; }
+
+      function handleBackClick() {
+          if (isDirty) {
+              openBS('save-confirm');
+          } else {
+              window.location.href = 'home.html';
+          }
+      }
+
+      function handleCancelClick() {
+          if (isDirty) {
+              openBS('save-confirm');
+          } else {
+              window.location.href = 'home.html';
+          }
+      }
+
+      function discardAndGoHome() {
+          window.location.href = 'home.html';
+      }
+
+      function saveAndGoHome() {
+          closeBS('save-confirm');
+          handleSave();
+      }
+
+      function openBS(id) {
+          document.getElementById('bs-' + id).classList.add('open');
+          if (id === 'turf-select') renderTurfs();
+      }
+      function closeBS(id) {
+          document.getElementById('bs-' + id).classList.remove('open');
+      }
+
+      /* ═══════════════════════════════════════════════
+         TURF SELECTION
+      ═══════════════════════════════════════════════ */
+      const turfs = [
+          { name: 'Fabzia Arena', frequent: true },
+          { name: 'Skyline Sports Turf', frequent: false },
+          { name: 'Green Park Turf', frequent: true },
+          { name: 'Urban Kick Arena', frequent: false },
+          { name: 'Olympia Turf', frequent: false },
+          { name: 'City Kickers', frequent: true }
+      ];
+      let selectedTurf = null;
+
+      function renderTurfs() {
+          const list = document.getElementById('turf-list');
+          const searchInput = document.getElementById('turf-search');
+          const searchQ = searchInput ? searchInput.value.toLowerCase() : '';
+          list.innerHTML = '';
+          
+          let filteredTurfs = turfs.filter(t => t.name.toLowerCase().includes(searchQ));
+          let frequentTurfs = filteredTurfs.filter(t => t.frequent).sort((a,b) => a.name.localeCompare(b.name));
+          let otherTurfs = filteredTurfs.filter(t => !t.frequent).sort((a,b) => a.name.localeCompare(b.name));
+          
+          if (frequentTurfs.length > 0) {
+              const head = document.createElement('div');
+              head.className = 'px-3 py-2 text-[13px] font-semibold text-app-sub uppercase tracking-wider font-inter';
+              head.innerText = 'Frequently Searched';
+              list.appendChild(head);
+              frequentTurfs.forEach(t => list.appendChild(createTurfEl(t.name)));
+          }
+          if (otherTurfs.length > 0) {
+              const head = document.createElement('div');
+              head.className = 'px-3 py-2 text-[13px] font-semibold text-app-sub uppercase tracking-wider mt-2 font-inter';
+              head.innerText = 'All Turfs';
+              list.appendChild(head);
+              otherTurfs.forEach(t => list.appendChild(createTurfEl(t.name)));
+          }
+          if (filteredTurfs.length === 0) {
+              list.innerHTML = `<div class="p-4 text-center text-app-placeholder text-[14px] font-inter">No turfs found</div>`;
+          }
+      }
+
+      function createTurfEl(turfName) {
+          const isSelected = selectedTurf === turfName;
+          const el = document.createElement('div');
+          el.className = 'flex items-center justify-between px-3 py-3 hover:bg-gray-50 cursor-pointer rounded-lg mb-1';
+          el.onclick = () => {
+              selectedTurf = turfName;
+              markDirty();
+              const display = document.getElementById('turf-display');
+              display.value = selectedTurf;
+              closeBS('turf-select');
+          };
+          el.innerHTML = `
+              <span class="text-[15px] text-app-text font-medium font-roboto">${turfName}</span>
+              <div class="check-box ${isSelected ? 'active' : ''}">
+                  ${isSelected ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M20 6 9 17l-5-5"/></svg>' : ''}
+              </div>
+          `;
+          return el;
+      }
+
+      /* ═══════════════════════════════════════════════
          VALIDATE
       ═══════════════════════════════════════════════ */
       function validate() {
+        const turf      = document.getElementById("turf-display").value.trim();
+        const sport     = document.getElementById("sport-id").value;
         const length    = document.getElementById("field-length").value.trim();
         const width     = document.getElementById("field-width").value.trim();
         const player    = document.getElementById("field-playerAside").value.trim();
         const parentRef = document.getElementById("field-parentRef").value.trim();
+        const divSide   = document.getElementById("field-divSideType").value.trim();
+        const divPrio   = document.getElementById("field-divPriority").value.trim();
+        const divImg    = document.getElementById("field-divImageUrl").value.trim();
 
+        if (!turf)      { showToast("Please select Turf.");                    return false; }
+        if (!sport)     { showToast("Please select Sport.");                   return false; }
         if (!length)    { showToast("Please enter Length.");                   return false; }
         if (!width)     { showToast("Please enter Width.");                    return false; }
         if (!player)    { showToast("Please enter PlayerAside.");              return false; }
         if (!parentRef) { showToast("Please enter Parent Unique Reference.");  return false; }
+        if (!divSide)   { showToast("Please enter Division Side Type.");       return false; }
+        if (!divPrio)   { showToast("Please enter Division Priority Sequence.");return false; }
+        if (!divImg)    { showToast("Please enter Division Image url.");       return false; }
         return true;
       }
 
       /* ═══════════════════════════════════════════════
-         CONFIRM
+         SAVE
       ═══════════════════════════════════════════════ */
-      function handleConfirm() {
+      function handleSave() {
         if (!validate()) return;
 
         const payload = {
+          turf:      document.getElementById("turf-display").value.trim(),
+          sportId:   document.getElementById("sport-id").value,
           length:    document.getElementById("field-length").value.trim(),
           width:     document.getElementById("field-width").value.trim(),
           playerAside: document.getElementById("field-playerAside").value.trim(),
           parentUniqueReference: document.getElementById("field-parentRef").value.trim(),
+          divisionSideType: document.getElementById("field-divSideType").value.trim(),
+          divisionPriority: document.getElementById("field-divPriority").value.trim(),
+          divisionImageUrl: document.getElementById("field-divImageUrl").value.trim(),
         };
 
         console.log("Map Turf Sports with Division payload:", payload);
         showToast("Mapped successfully!");
-        /* TODO: wire to API */
+        
+        setTimeout(() => {
+            window.location.href = 'home.html';
+        }, 800);
       }
     </script>
   </body>

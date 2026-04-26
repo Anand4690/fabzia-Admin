@@ -120,7 +120,7 @@
             <h3 class="font-inter text-[18px] font-bold text-app-heading mb-4">Select Turfs</h3>
             <div class="relative">
                 <input id="multi-turf-search" type="text" placeholder="Search Turf..." oninput="renderMultiTurfList(this.value)" class="w-full h-[48px] pl-10 pr-4 rounded-[8px] border border-app-border font-roboto text-[16px] focus:border-app-heading transition-colors">
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-app-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0"/></svg>
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-app-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             </div>
         </div>
         <div class="flex-1 overflow-y-auto px-5 pb-24 scrollbar-hide" id="multi-turf-list-container">
@@ -306,15 +306,21 @@
           div.id = `turf-block-${tid}`;
           div.className = "flex flex-col border border-app-border bg-white rounded-[12px] overflow-visible shadow-sm animate-fade-in";
           div.innerHTML = `
-              <button type="button" onclick="toggleTurfAccordion('${tid}')" class="flex items-center justify-between w-full px-4 py-4 border-b border-app-border bg-[#fcfcfc] rounded-t-[12px] active:bg-gray-50 transition-colors">
-                 <div class="flex items-center gap-2">
-                     <svg id="turf-chev-${tid}" class="transition-transform duration-200" style="transform: rotate(180deg);" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9L12 15L18 9"/></svg>
-                     <h3 id="turf-heading-${tid}" class="font-inter text-[16px] font-bold text-app-heading">${turfName}</h3>
-                 </div>
-                 <div onclick="event.stopPropagation()">
-                     <button type="button" onclick="deleteTurfBlock('${tid}')" class="font-inter text-[13px] font-semibold text-red-500 active:opacity-70 transition-opacity px-2 py-1">Delete</button>
-                 </div>
-              </button>
+              <div class="flex items-center justify-between w-full px-4 py-3 border-b border-app-border bg-[#fcfcfc] rounded-t-[12px]">
+                 <button type="button" onclick="toggleTurfAccordion('${tid}')" class="flex items-center gap-2 flex-1 min-w-0 active:opacity-70 transition-opacity">
+                     <svg id="turf-chev-${tid}" class="transition-transform duration-200 shrink-0" style="transform: rotate(180deg);" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9L12 15L18 9"/></svg>
+                     <h3 id="turf-heading-${tid}" class="font-inter text-[16px] font-bold text-app-heading truncate">${turfName}</h3>
+                 </button>
+                 <button type="button" onclick="deleteTurfBlock('${tid}')" class="text-red-500 active:opacity-70 transition-opacity p-2 flex items-center justify-center rounded-full active:bg-red-50 shrink-0 ml-2" aria-label="Delete Turf">
+                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                         <path d="M3 6h18"></path>
+                         <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                         <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                         <line x1="10" y1="11" x2="10" y2="17"></line>
+                         <line x1="14" y1="11" x2="14" y2="17"></line>
+                     </svg>
+                 </button>
+              </div>
               
               <div id="turf-content-${tid}" class="p-4 flex flex-col gap-4">
                  <div class="flex flex-col gap-1.5 relative stop-global-click">
