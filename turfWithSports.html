@@ -4,25 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Turf With Sports – Fabzia Admin</title>
-    <meta name="description" content="Assign a sport to a turf with timings, duration and pricing." />
-
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="utility.css" />
-
+    
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              "app-bg":          "hsl(0,0%,96%)",
+              "app-bg":          "#f2f4f7",
               "app-heading":     "#1a1a1a",
               "app-text":        "rgba(15,15,15,1)",
               "app-sub":         "rgba(77,77,77,1)",
               "app-placeholder": "rgba(171,171,171,1)",
-              "app-border":      "#d7d7d7",
+              "app-border":      "#e5e7eb",
               "app-icon":        "#4d4d4d",
               "app-btn":         "#125dcd",
             },
@@ -30,483 +26,598 @@
               inter:  ["Inter",  "sans-serif"],
               roboto: ["Roboto", "sans-serif"],
             },
-          },
-        },
+          }
+        }
       };
     </script>
 
     <style>
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-4px); }
-        to   { opacity: 1; transform: translateY(0); }
+      @keyframes slideUp {
+        from { transform: translateY(100%); }
+        to   { transform: translateY(0); }
       }
-      .animate-fade-in { animation: fadeIn 0.18s ease-out forwards; }
+      @keyframes slideDown {
+        from { transform: translateY(0); }
+        to   { transform: translateY(100%); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+      @keyframes fadeOut {
+        from { opacity: 1; }
+        to   { opacity: 0; }
+      }
+
+      .sheet-enter { animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+      .sheet-exit  { animation: slideDown 0.25s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+      .backdrop-enter { animation: fadeIn 0.3s ease forwards; }
+      .backdrop-exit  { animation: fadeOut 0.25s ease forwards; }
 
       .scrollbar-hide::-webkit-scrollbar { display: none; }
       .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
-      .form-scroll-area { padding-bottom: 88px; }
 
       input:focus, textarea:focus, select:focus {
         border-color: #1a1a1a !important;
         outline: none;
       }
-
-      /* ── Time menu scroll ── */
-      .time-menu {
-        max-height: 240px; /* 5 items (48px each) */
-      }
     </style>
   </head>
 
-  <body class="flex justify-center min-h-screen" style="background:hsl(0,0%,96%)">
-    <div id="app" class="w-full max-w-[430px] min-h-screen flex flex-col relative" style="background:hsl(0,0%,96%)">
-
-      <!-- ── Nav ── -->
-      <div class="sticky top-0 z-30 flex items-center gap-2 px-1 py-2 border-b border-app-border bg-white h-16">
-        <button onclick="window.location.href='home.html'" aria-label="Go back"
-          class="w-12 h-12 flex items-center justify-center shrink-0 rounded-full active:bg-gray-100 transition-colors">
+  <body class="flex justify-center min-h-screen bg-app-bg text-app-text">
+    <div id="app" class="w-full max-w-[430px] min-h-screen flex flex-col relative bg-app-bg shadow-sm">
+      
+      <!-- Sticky Nav -->
+      <div class="sticky top-0 z-30 flex items-center px-1 py-2 border-b border-app-border bg-white h-16 shadow-sm">
+        <button onclick="window.location.href='home.html'" aria-label="Go back" class="w-12 h-12 flex items-center justify-center shrink-0 rounded-full active:bg-gray-100 transition-colors">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path fill-rule="evenodd" clip-rule="evenodd"
-              d="M16.966 5.25L10.216 12L16.966 18.75L15.375 20.341L7.034 12L15.375 3.659L16.966 5.25Z" fill="#1A1A1A"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M16.966 5.25L10.216 12L16.966 18.75L15.375 20.341L7.034 12L15.375 3.659L16.966 5.25Z" fill="#1A1A1A"/>
           </svg>
         </button>
-        <span class="font-inter text-[18px] font-normal leading-[28px] tracking-[0.04px] text-app-heading">
+        <span class="font-inter text-[18px] font-semibold text-app-heading ml-1">
           Turf With Sports
         </span>
       </div>
 
-      <!-- ── Form ── -->
-      <div class="flex-1 flex flex-col gap-5 px-5 pt-5 form-scroll-area">
-
-        <!-- Main Sports Selection -->
-        <div class="flex flex-col gap-2 relative stop-global-click">
-            <label class="font-inter text-[14px] font-semibold tracking-[0.04px] text-app-heading">
-                Select Sports
-            </label>
-            <button type="button" onclick="toggleMainSports()" class="w-full flex items-center justify-between h-[52px] px-3 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors">
-                <span id="main-sports-label" class="font-roboto text-[16px] text-app-placeholder line-clamp-1 text-left mr-2">Select Sports</span>
-                <svg id="main-sports-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" class="shrink-0 transition-transform duration-200">
-                    <path d="M6 9L12 15L18 9" stroke="#4D4D4D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </button>
-            <div id="main-sports-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-40 shadow-lg overflow-y-auto max-h-[240px] animate-fade-in custom-scrollbar"></div>
+      <!-- Main Scrollable Area -->
+      <div class="flex-1 flex flex-col gap-6 px-5 pt-6 pb-24 overflow-y-auto">
+        
+        <!-- 1. Select Turf Multi-Select Trigger -->
+        <div class="flex flex-col gap-2 relative">
+          <label class="font-inter text-[14px] font-semibold text-app-heading">Add Turfs</label>
+          <button type="button" onclick="openMultiTurfSheet()" class="w-full flex items-center justify-between h-[52px] px-3 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors active:bg-gray-50">
+            <span class="font-roboto text-[16px] text-app-placeholder">Select turf...</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="shrink-0">
+               <path d="M6 9L12 15L18 9" stroke="#4D4D4D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
 
-        <!-- Fill Sports Heading -->
-        <h2 id="fill-sports-heading" class="hidden font-inter text-[16px] font-semibold tracking-[0.04px] text-app-heading mt-2">
-            Fill Sports Field
-        </h2>
+        <!-- 3. Turf Blocks Dynamically Injected Here -->
+        <div id="turf-blocks-container" class="flex flex-col gap-6 mt-2 pb-10"></div>
 
-        <!-- Sport Sections Container -->
-        <div id="sport-sections-container" class="flex flex-col gap-5">
-            <!-- Dynamically populated -->
-        </div>
+      </div>
 
-      </div><!-- /form -->
-
-      <!-- ── Sticky Bottom ── -->
-      <div class="sticky bottom-0 z-30 w-full px-5 py-4 border-t border-app-border bg-white">
-        <button id="btn-confirm" type="button" onclick="handleConfirm()"
-          class="w-full h-[52px] bg-app-btn text-white rounded-[8px] font-inter text-[16px] font-semibold leading-[24px] tracking-[0.04px] active:opacity-90 transition-opacity">
+      <!-- Bottom Confirm -->
+      <div class="fixed bottom-0 left-0 right-0 z-20 w-full max-w-[430px] mx-auto px-5 py-4 border-t border-app-border bg-white" style="padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));">
+        <button type="button" onclick="handleConfirm()" class="w-full h-[52px] bg-app-btn text-white rounded-[8px] font-inter text-[16px] font-semibold active:opacity-90 transition-opacity">
           Confirm
         </button>
       </div>
 
     </div><!-- /app -->
 
-    <!-- ══════════════════════════════════════════════════════
-         DISCARD BOTTOM SHEET
-    ══════════════════════════════════════════════════════ -->
-    <div id="discard-overlay" onclick="closeDiscardSheet()" class="fixed inset-0 z-50 bg-black/50 hidden transition-opacity duration-300 opacity-0 flex items-end justify-center">
-      <div id="discard-sheet" onclick="event.stopPropagation()" class="w-full max-w-[430px] bg-white rounded-t-[20px] p-6 pb-8 transform translate-y-full transition-transform duration-300 flex flex-col gap-6">
-        <!-- Handle bar -->
-        <div class="flex justify-center -mt-2">
-            <div class="w-10 h-1 rounded-full bg-gray-300"></div>
-        </div>
-        
-        <div class="flex flex-col gap-2 relative mt-2 text-left">
-            <p class="font-inter text-[18px] font-semibold text-app-heading">Discard Details</p>
-            <p class="font-roboto text-[16px] text-app-sub">Do you want to Discard Details for <span id="discard-sport-name" class="font-normal text-app-heading"></span>?</p>
-        </div>
 
-        <div class="flex items-center gap-3 w-full">
-            <button type="button" onclick="closeDiscardSheet()" class="flex-1 h-[52px] rounded-[8px] border border-app-border bg-white font-inter text-[16px] font-semibold text-app-heading active:bg-gray-50 transition-colors">
-                Cancel
-            </button>
-            <button type="button" onclick="confirmDiscard()" class="flex-1 h-[52px] rounded-[8px] font-inter text-[16px] font-semibold text-white active:opacity-90 transition-opacity" style="background-color: #DE3636;">
-                Yes
+    <!-- ══════════════════════════════════════════════════════
+         MULTI-TURF SELECTION BOTTOM SHEET
+    ══════════════════════════════════════════════════════ -->
+    <div id="multi-turf-backdrop" class="hidden fixed inset-0 z-[100] bg-black/40" onclick="closeMultiTurfSheet()"></div>
+    <div id="multi-turf-sheet" class="hidden fixed bottom-0 left-0 right-0 z-[110] w-full max-w-[430px] mx-auto bg-white rounded-t-2xl shadow-2xl flex flex-col" style="height: 85vh;">
+        <div class="flex justify-center pt-3 pb-2 shrink-0">
+            <div class="w-10 h-1 rounded-full bg-gray-200"></div>
+        </div>
+        <div class="px-5 pb-4 shrink-0">
+            <h3 class="font-inter text-[18px] font-bold text-app-heading mb-4">Select Turfs</h3>
+            <div class="relative">
+                <input id="multi-turf-search" type="text" placeholder="Search Turf..." oninput="renderMultiTurfList(this.value)" class="w-full h-[48px] pl-10 pr-4 rounded-[8px] border border-app-border font-roboto text-[16px] focus:border-app-heading transition-colors">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-app-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0"/></svg>
+            </div>
+        </div>
+        <div class="flex-1 overflow-y-auto px-5 pb-24 scrollbar-hide" id="multi-turf-list-container">
+           <!-- Injected -->
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-app-border bg-white" style="padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));">
+            <button onclick="confirmMultiTurfsSelected()" class="w-full h-[52px] bg-app-btn text-white rounded-[8px] font-inter text-[16px] font-semibold active:opacity-90">
+                Add Selected
             </button>
         </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         DELETE TURF WARNING BOTTOM SHEET
+    ══════════════════════════════════════════════════════ -->
+    <div id="delete-turf-backdrop" class="hidden fixed inset-0 z-[120] bg-black/40" onclick="closeDeleteTurfSheet()"></div>
+    <div id="delete-turf-sheet" class="hidden fixed bottom-0 left-0 right-0 z-[130] w-full max-w-[430px] mx-auto bg-white rounded-t-2xl shadow-2xl flex flex-col pt-2 px-6" style="padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));">
+      <div class="flex justify-center pt-3 pb-4 shrink-0"><div class="w-10 h-1 rounded-full bg-gray-200"></div></div>
+      <h3 class="font-inter text-[18px] font-semibold text-app-heading text-left mb-6 leading-snug">
+        Are you sure you want to delete Turf?
+      </h3>
+      <div class="flex items-center gap-3">
+        <button onclick="closeDeleteTurfSheet()" class="flex-1 h-[48px] rounded-[8px] border border-app-border bg-white text-app-heading font-inter text-[16px] font-semibold active:bg-gray-50 transition-colors">
+          No
+        </button>
+        <button onclick="confirmDeleteTurfFinal()" class="flex-1 h-[48px] rounded-[8px] bg-red-500 text-white font-inter text-[16px] font-semibold active:opacity-90 transition-opacity">
+          Yes
+        </button>
       </div>
     </div>
 
+    <!-- ══════════════════════════════════════════════════════
+         DISCARD SPORT WARNING BOTTOM SHEET
+    ══════════════════════════════════════════════════════ -->
+    <div id="discard-sport-backdrop" class="hidden fixed inset-0 z-[100] bg-black/40" onclick="closeDiscardSport()"></div>
+    <div id="discard-sport-sheet" class="hidden fixed bottom-0 left-0 right-0 z-[110] w-full max-w-[430px] mx-auto bg-white rounded-t-2xl shadow-2xl flex flex-col pt-2 px-6" style="padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));">
+      <div class="flex justify-center pt-3 pb-4 shrink-0"><div class="w-10 h-1 rounded-full bg-gray-200"></div></div>
+      <h3 class="font-inter text-[18px] font-bold text-app-heading text-left mb-2">Discard Details</h3>
+      <p class="font-roboto text-[16px] text-app-sub mb-6 text-left">Do you want to Discard Details for <span id="discard-sport-name" class="font-semibold text-app-heading"></span>?</p>
+      <div class="flex items-center gap-3">
+        <button onclick="closeDiscardSport()" class="flex-1 h-[48px] rounded-[8px] border border-app-border bg-white text-app-heading font-inter text-[16px] font-semibold active:bg-gray-50 transition-colors">
+          Cancel
+        </button>
+        <button onclick="confirmDiscardSport()" class="flex-1 h-[48px] rounded-[8px] bg-red-500 text-white font-inter text-[16px] font-semibold active:opacity-90 transition-opacity">
+          Yes
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════
+         SCRIPTS
+    ══════════════════════════════════════════════════════ -->
     <script>
-      /* ═══════════════ GLOBAL DECLARATIONS ═══════════════ */
+      /* --- CONSTANTS --- */
+      const TURF_CATALOG = [
+        "Green Valley Turf", "City Sports Arena", "Sunrise Football Ground",
+        "Champions Cricket Turf", "Riverside Badminton Court", "Elite Sports Complex",
+        "Alpha Turf", "Omega Sports Center", "Metro Futsal", "Urban Kicks"
+      ].sort();
+
+      const FREQ_SEARCHED = ["Green Valley Turf", "City Sports Arena"];
+
+      const ALL_SPORTS = [
+        "Cricket", "Football", "Badminton", "Tennis", 
+        "Basketball", "Volleyball", "Hockey", "Swimming"
+      ];
+
       const TIME_OPTIONS = [];
       for (let h = 0; h < 24; h++) {
         for (let m = 0; m < 60; m += 30) {
-          const ampm  = h < 12 ? "AM" : "PM";
-          const hour  = h % 12 === 0 ? 12 : h % 12;
-          const min   = String(m).padStart(2, "0");
-          const label = `${hour}:${min} ${ampm}`;
-          const value = `${String(h).padStart(2,"0")}:${min}`; // 24h
-          TIME_OPTIONS.push({ label, value });
+          const ampm = h < 12 ? "AM" : "PM";
+          const hour = h % 12 === 0 ? 12 : h % 12;
+          const min = String(m).padStart(2, "0");
+          TIME_OPTIONS.push({ label: `${hour}:${min} ${ampm}`, value: `${String(h).padStart(2,"0")}:${min}` });
         }
       }
 
-      const TURF_LIST = [
-        "Green Valley Turf", "City Sports Arena", "Sunrise Football Ground",
-        "Champions Cricket Turf", "Riverside Badminton Court", "Elite Sports Complex",
-      ];
+      /* --- STATE --- */
+      const activeTurfs = {};
       
-      const ALL_SPORTS = [
-          "Cricket", "Football", "Badminton", "Tennis", 
-          "Basketball", "Volleyball", "Hockey", "Swimming"
-      ];
+      let multiTurfChecked = new Set();
+      let pendingDeleteTid = null;
 
-      let selectedSports = [];
-      let mainSportsOpen = false;
-      const sportState = {}; 
-
-      /* ═══════════════ MAIN SPORTS DROPDOWN ═══════════════ */
-      function buildMainSportsMenu() {
-        const menu = document.getElementById("main-sports-menu");
-        menu.innerHTML = ALL_SPORTS.map(sport => {
-            const isSel = selectedSports.includes(sport);
-            return `
-            <button type="button" onclick="toggleSportSelection('${sport}')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors ${isSel ? 'bg-gray-50' : ''}">
-                <div class="w-5 h-5 rounded-[4px] border ${isSel ? 'bg-app-btn border-app-btn' : 'border-[#d7d7d7]'} flex items-center justify-center shrink-0">
-                    <svg class="${isSel ? 'block' : 'hidden'}" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path d="M2.5 6L5 8.5L9.5 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <span class="font-roboto text-[16px] text-app-text">${sport}</span>
-            </button>
-            `;
-        }).join("");
-        
-        const lbl = document.getElementById("main-sports-label");
-        if (selectedSports.length === 0) {
-            lbl.textContent = "Select Sports";
-            lbl.style.color = "rgba(171,171,171,1)";
-        } else {
-            lbl.textContent = selectedSports.join(", ");
-            lbl.style.color = "rgba(15,15,15,1)";
-        }
-      }
-
-      function toggleMainSports() {
-        const currentlyOpen = mainSportsOpen;
-        closeAllDropdowns();
-        if (!currentlyOpen) {
-            mainSportsOpen = true;
-            document.getElementById("main-sports-menu").classList.remove("hidden");
-            document.getElementById("main-sports-chevron").style.transform = "rotate(180deg)";
-            buildMainSportsMenu();
-        }
-      }
-
+      let pendingDiscardTid = null;
       let pendingDiscardSport = null;
 
-      function toggleSportSelection(sport) {
-        const safeSport = sport.replace(/\s+/g,'');
-        if (selectedSports.includes(sport)) {
-            const state = sportState[safeSport];
-            const nameEl = document.getElementById(`nickname-${safeSport}`);
-            const sportIdEl = document.getElementById(`sportId-${safeSport}`);
-            const durationEl = document.getElementById(`duration-${safeSport}`);
-            const minAmountEl = document.getElementById(`minAmount-${safeSport}`);
-
-            const hasData = (state && (state.turf || state.start || state.end)) ||
-                            (nameEl && nameEl.value.trim() !== '') ||
-                            (sportIdEl && sportIdEl.value.trim() !== '') ||
-                            (durationEl && durationEl.value.trim() !== '') ||
-                            (minAmountEl && minAmountEl.value.trim() !== '');
-
-            if (hasData) {
-                openDiscardSheet(sport);
-                return;
-            } else {
-                removeSport(sport);
-            }
-        } else {
-            selectedSports.push(sport);
-            sportState[safeSport] = { turf: '', start: '', end: '', turfOpen: false, startOpen: false, endOpen: false, expanded: true };
-            addSportDOM(sport);
-        }
-        buildMainSportsMenu();
-        updateSportsHeading();
+      /* --- MULTI TURF SHEET (ADD TURFS) --- */
+      function openMultiTurfSheet() {
+         multiTurfChecked.clear(); 
+         renderMultiTurfList('');
+         document.getElementById('multi-turf-search').value = '';
+         openSheet('multi-turf');
       }
+      function closeMultiTurfSheet() { closeSheet('multi-turf'); }
 
-      function removeSport(sport) {
-        const safeSport = sport.replace(/\s+/g,'');
-        selectedSports = selectedSports.filter(s => s !== sport);
-        const section = document.getElementById(`sport-section-${safeSport}`);
-        if(section) section.remove();
-        delete sportState[safeSport];
-        buildMainSportsMenu();
-        updateSportsHeading();
-      }
+      function renderMultiTurfList(filterText) {
+          const container = document.getElementById('multi-turf-list-container');
+          container.innerHTML = '';
+          const lT = filterText.toLowerCase().trim();
 
-      function openDiscardSheet(sport) {
-        pendingDiscardSport = sport;
-        document.getElementById('discard-sport-name').textContent = sport;
-        
-        const overlay = document.getElementById("discard-overlay");
-        const sheet   = document.getElementById("discard-sheet");
-        closeAllDropdowns();
-        
-        overlay.classList.remove("hidden");
-        setTimeout(() => {
-            overlay.classList.remove("opacity-0");
-            sheet.classList.remove("translate-y-full");
-        }, 10);
-      }
+          const allHtml = [];
+          
+          if(!lT) {
+             allHtml.push(`<div class="font-inter text-[12px] font-semibold text-app-sub uppercase tracking-wider mb-2 mt-2">Frequently Searched</div>`);
+             FREQ_SEARCHED.forEach(turf => {
+                allHtml.push(createMultiTurfRow(turf));
+             });
+             allHtml.push(`<div class="font-inter text-[12px] font-semibold text-app-sub uppercase tracking-wider mb-2 mt-6">All Turfs (A-Z)</div>`);
+          }
 
-      function closeDiscardSheet() {
-        const overlay = document.getElementById("discard-overlay");
-        const sheet   = document.getElementById("discard-sheet");
-        
-        overlay.classList.add("opacity-0");
-        sheet.classList.add("translate-y-full");
-        
-        setTimeout(() => {
-            overlay.classList.add("hidden");
-            pendingDiscardSport = null;
-        }, 300);
-      }
-
-      function confirmDiscard() {
-        if (pendingDiscardSport) {
-            removeSport(pendingDiscardSport);
-        }
-        closeDiscardSheet();
-      }
-
-      function updateSportsHeading() {
-          const heading = document.getElementById('fill-sports-heading');
-          if (heading) {
-              if (selectedSports.length > 0) {
-                  heading.classList.remove('hidden');
-              } else {
-                  heading.classList.add('hidden');
+          TURF_CATALOG.forEach(turf => {
+              if (turf.toLowerCase().includes(lT)) {
+                  allHtml.push(createMultiTurfRow(turf));
               }
+          });
+
+          container.innerHTML = allHtml.join('');
+      }
+
+      function createMultiTurfRow(turfName) {
+          const isChecked = multiTurfChecked.has(turfName);
+          return `
+          <label class="flex items-center gap-3 py-3 border-b border-app-border last:border-0 cursor-pointer active:bg-gray-50 transition-colors">
+             <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleMultiCheckbox(this, '${turfName}')" class="w-5 h-5 rounded border-app-border text-app-btn focus:ring-app-btn accent-app-btn">
+             <span class="font-roboto text-[16px] text-app-text">${turfName}</span>
+          </label>
+          `;
+      }
+      function toggleMultiCheckbox(input, name) {
+          if (input.checked) multiTurfChecked.add(name);
+          else multiTurfChecked.delete(name);
+      }
+      function confirmMultiTurfsSelected() {
+          multiTurfChecked.forEach(name => {
+              addTurfBlockToPage(name);
+          });
+          closeMultiTurfSheet();
+      }
+
+      /* --- DELETE TURF --- */
+      function deleteTurfBlock(tid) {
+          pendingDeleteTid = tid;
+          openSheet('delete-turf');
+      }
+
+      function toggleTurfAccordion(tid) {
+          const content = document.getElementById(`turf-content-${tid}`);
+          const chev = document.getElementById(`turf-chev-${tid}`);
+          if (content.classList.contains('hidden')) {
+              content.classList.remove('hidden');
+              chev.style.transform = "rotate(180deg)";
+          } else {
+              content.classList.add('hidden');
+              chev.style.transform = "rotate(0deg)";
+          }
+      }
+      function closeDeleteTurfSheet() {
+          closeSheet('delete-turf');
+          pendingDeleteTid = null;
+      }
+      function confirmDeleteTurfFinal() {
+          if (pendingDeleteTid) {
+             const turfName = activeTurfs[pendingDeleteTid].name;
+             delete activeTurfs[pendingDeleteTid];
+             document.getElementById(`turf-block-${pendingDeleteTid}`).remove();
+             multiTurfChecked.delete(turfName); // ensure it's unchecked when the sheet opens again
+          }
+          closeDeleteTurfSheet();
+      }
+
+      /* --- TURF BLOCKS MANAGEMENT --- */
+      function addTurfBlockToPage(turfName) {
+          const tid = 'tid_' + Date.now() + Math.floor(Math.random()*1000);
+          activeTurfs[tid] = {
+              name: turfName,
+              selectedSports: [],
+              sportState: {} 
+          };
+
+          const container = document.getElementById('turf-blocks-container');
+          const div = document.createElement('div');
+          div.id = `turf-block-${tid}`;
+          div.className = "flex flex-col border border-app-border bg-white rounded-[12px] overflow-visible shadow-sm animate-fade-in";
+          div.innerHTML = `
+              <button type="button" onclick="toggleTurfAccordion('${tid}')" class="flex items-center justify-between w-full px-4 py-4 border-b border-app-border bg-[#fcfcfc] rounded-t-[12px] active:bg-gray-50 transition-colors">
+                 <div class="flex items-center gap-2">
+                     <svg id="turf-chev-${tid}" class="transition-transform duration-200" style="transform: rotate(180deg);" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9L12 15L18 9"/></svg>
+                     <h3 id="turf-heading-${tid}" class="font-inter text-[16px] font-bold text-app-heading">${turfName}</h3>
+                 </div>
+                 <div onclick="event.stopPropagation()">
+                     <button type="button" onclick="deleteTurfBlock('${tid}')" class="font-inter text-[13px] font-semibold text-red-500 active:opacity-70 transition-opacity px-2 py-1">Delete</button>
+                 </div>
+              </button>
+              
+              <div id="turf-content-${tid}" class="p-4 flex flex-col gap-4">
+                 <div class="flex flex-col gap-1.5 relative stop-global-click">
+                    <label class="font-inter text-[13px] font-semibold tracking-wide text-app-sub uppercase">Select Sports</label>
+                    <button type="button" onclick="toggleTurfSportsMenu('${tid}')" class="w-full flex items-center justify-between h-[52px] px-3 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors active:bg-gray-50">
+                        <span id="sports-label-${tid}" class="font-roboto text-[16px] text-app-placeholder line-clamp-1 text-left">Select Sports</span>
+                        <svg id="sports-chevron-${tid}" width="24" height="24" viewBox="0 0 24 24" fill="none" class="shrink-0 transition-transform duration-200">
+                            <path d="M6 9L12 15L18 9" stroke="#4D4D4D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div id="sports-menu-${tid}" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-30 shadow-lg overflow-y-auto max-h-[220px] py-1 scrollbar-hide"></div>
+                 </div>
+                 <div id="sports-container-${tid}" class="flex flex-col gap-4"></div>
+              </div>
+          `;
+          container.appendChild(div);
+          renderTurfSportsMenu(tid);
+      }
+
+
+
+      /* --- SPORTS IN TURF --- */
+      function renderTurfSportsMenu(tid) {
+          const menu = document.getElementById(`sports-menu-${tid}`);
+          const turf = activeTurfs[tid];
+          
+          menu.innerHTML = ALL_SPORTS.map(sport => {
+              const isSel = turf.selectedSports.includes(sport);
+              return `
+              <button type="button" onclick="toggleSportInTurf('${tid}', '${sport}')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors ${isSel?'bg-gray-50':''}">
+                  <div class="w-5 h-5 rounded-[4px] border ${isSel?'bg-app-btn border-app-btn':'border-app-border'} flex items-center justify-center shrink-0">
+                      <svg class="${isSel?'block':'hidden'}" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6L5 8.5L9.5 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                  <span class="font-roboto text-[16px] text-app-text">${sport}</span>
+              </button>
+              `;
+          }).join('');
+
+          const lbl = document.getElementById(`sports-label-${tid}`);
+          if (turf.selectedSports.length > 0) {
+              lbl.textContent = turf.selectedSports.join(', ');
+              lbl.style.color = "#1a1a1a";
+          } else {
+              lbl.textContent = "Select Sports";
+              lbl.style.color = "rgba(171,171,171,1)";
           }
       }
 
-      /* ═══════════════ PER-SPORT ACCORDIONS ═══════════════ */
-      function addSportDOM(sport) {
-        const container = document.getElementById("sport-sections-container");
-        const div = document.createElement('div');
-        const safeSport = sport.replace(/\s+/g, '');
-        div.id = `sport-section-${safeSport}`;
-        div.className = "flex flex-col border border-app-border rounded-[8px] bg-white overflow-visible transition-all duration-300 animate-fade-in";
-
-        div.innerHTML = `
-          <!-- Accordion Header -->
-          <button type="button" onclick="toggleSportAccordion('${safeSport}')" class="flex items-center justify-between w-full h-[56px] px-4 bg-[#f8f9fa] rounded-t-[8px] border-b border-app-border active:bg-gray-100 transition-colors">
-            <span class="font-inter font-semibold text-[15px] text-app-heading">${sport}</span>
-            <svg id="chevron-${safeSport}" class="transition-transform duration-200" style="transform: rotate(180deg);" width="20" height="20" viewBox="0 0 24 24" fill="none" class="shrink-0">
-                <path d="M6 9L12 15L18 9" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
+      function toggleTurfSportsMenu(tid) {
+          const menu = document.getElementById(`sports-menu-${tid}`);
+          const chevron = document.getElementById(`sports-chevron-${tid}`);
+          const isOpen = !menu.classList.contains('hidden');
           
-          <!-- Accordion Content -->
-          <div id="content-${safeSport}" class="flex flex-col gap-4 p-4 rounded-b-[8px]">
-            
-            <div class="flex flex-col gap-2">
-              <label class="font-inter text-[14px] font-semibold text-app-heading">Nickname</label>
-              <input id="nickname-${safeSport}" type="text" placeholder="Nickname" onfocus="scrollToField(this)"
-                class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none focus:border-app-heading transition-colors" />
-            </div>
-
-            <div class="flex flex-col gap-2 relative stop-global-click">
-              <label class="font-inter text-[14px] font-semibold text-app-heading">Turf List</label>
-              <button type="button" onclick="toggleLocalDropdown('${safeSport}', 'turf')" class="w-full flex items-center justify-between h-[52px] px-3 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors">
-                <span id="turf-label-${safeSport}" class="font-roboto text-[16px] text-app-placeholder">Select Turf</span>
-                <svg id="turf-chevron-${safeSport}" width="24" height="24" viewBox="0 0 24 24" fill="none" class="shrink-0 transition-transform duration-200">
-                   <path d="M6 9L12 15L18 9" stroke="#4D4D4D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-              <div id="turf-menu-${safeSport}" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-30 shadow-lg overflow-y-auto max-h-[200px]"></div>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="font-inter text-[14px] font-semibold text-app-heading">Sport id</label>
-              <input id="sportId-${safeSport}" type="text" placeholder="Sport id" onfocus="scrollToField(this)"
-                class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none focus:border-app-heading transition-colors" />
-            </div>
-
-            <div class="flex flex-col gap-2 relative stop-global-click">
-              <label class="font-inter text-[14px] font-semibold text-app-heading">Turf Start Time</label>
-              <button type="button" onclick="toggleLocalDropdown('${safeSport}', 'start')" class="w-full flex items-center justify-between h-[52px] px-3 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors">
-                <span id="start-label-${safeSport}" class="font-roboto text-[16px] text-app-placeholder">Select Start Time</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="shrink-0">
-                  <circle cx="12" cy="12" r="9" stroke="#4d4d4d" stroke-width="1.5"/>
-                  <path d="M12 7v5l3 3" stroke="#4d4d4d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-              <div id="start-menu-${safeSport}" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-30 shadow-lg overflow-y-auto max-h-[240px]"></div>
-            </div>
-
-            <div class="flex flex-col gap-2 relative stop-global-click">
-              <label class="font-inter text-[14px] font-semibold text-app-heading">Turf End Time</label>
-              <button type="button" onclick="toggleLocalDropdown('${safeSport}', 'end')" class="w-full flex items-center justify-between h-[52px] px-3 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors">
-                <span id="end-label-${safeSport}" class="font-roboto text-[16px] text-app-placeholder">Select End Time</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="shrink-0">
-                  <circle cx="12" cy="12" r="9" stroke="#4d4d4d" stroke-width="1.5"/>
-                  <path d="M12 7v5l3 3" stroke="#4d4d4d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-              <div id="end-menu-${safeSport}" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-30 shadow-lg overflow-y-auto max-h-[240px]"></div>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="font-inter text-[14px] font-semibold text-app-heading">Sport Duration</label>
-              <input id="duration-${safeSport}" type="text" inputmode="numeric" placeholder="Sport Duration" onfocus="scrollToField(this)"
-                class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none focus:border-app-heading transition-colors" />
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="font-inter text-[14px] font-semibold text-app-heading">Minimum Amount</label>
-              <input id="minAmount-${safeSport}" type="text" inputmode="decimal" placeholder="Minimum Amount" onfocus="scrollToField(this)"
-                class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text placeholder:text-app-placeholder outline-none focus:border-app-heading transition-colors" />
-            </div>
-
-          </div>
-        `;
-        container.appendChild(div);
-        
-        buildMenusForSport(safeSport);
+          closeAllDropdowns();
+          
+          if (!isOpen) {
+              menu.classList.remove('hidden');
+              chevron.style.transform = "rotate(180deg)";
+          }
       }
 
-      function toggleSportAccordion(sportKey) {
-        const state = sportState[sportKey];
-        state.expanded = !state.expanded;
-        
-        const content = document.getElementById(`content-${sportKey}`);
-        const chevron = document.getElementById(`chevron-${sportKey}`);
-        
-        if(state.expanded) {
-            content.classList.remove('hidden');
-            content.classList.add('flex');
-            chevron.style.transform = "rotate(180deg)";
-        } else {
-            content.classList.add('hidden');
-            content.classList.remove('flex');
-            chevron.style.transform = "";
-        }
+      function toggleSportInTurf(tid, sport) {
+          const turf = activeTurfs[tid];
+          const safeSport = sport.replace(/\s+/g, '');
+          const combinedId = `${tid}-${safeSport}`;
+
+          if (turf.selectedSports.includes(sport)) {
+              
+              const sState = turf.sportState[sport];
+              const nameEl = document.getElementById(`input-nickname-${combinedId}`);
+              const sidEl  = document.getElementById(`input-sid-${combinedId}`);
+              const durEl  = document.getElementById(`input-dur-${combinedId}`);
+              const amtEl  = document.getElementById(`input-amt-${combinedId}`);
+              const slotEl = document.getElementById(`input-slot-${combinedId}`);
+              const imgs   = document.getElementById(`img-thumb-${combinedId}`);
+
+              const hasData = (sState && (sState.start || sState.end)) ||
+                              (nameEl && nameEl.value.trim() !== '') ||
+                              (sidEl && sidEl.value.trim() !== '')   ||
+                              (durEl && durEl.value.trim() !== '')   ||
+                              (amtEl && amtEl.value.trim() !== '')   ||
+                              (slotEl && slotEl.value.trim() !== '') ||
+                              (imgs && imgs.children.length > 0);
+
+              if (hasData) {
+                  pendingDiscardTid = tid;
+                  pendingDiscardSport = sport;
+                  document.getElementById('discard-sport-name').textContent = sport;
+                  openSheet('discard-sport');
+                  return;
+              } else {
+                  removeSportFromTurf(tid, sport);
+              }
+          } else {
+              turf.selectedSports.push(sport);
+              turf.sportState[sport] = { start:'', end:'' };
+              addSportDOMToTurf(tid, sport);
+          }
+          renderTurfSportsMenu(tid);
       }
 
-      /* ═══════════════ PER-SPORT DROPDOWNS ═══════════════ */
-      function buildMenusForSport(sportKey) {
-        const turfMenu = document.getElementById(`turf-menu-${sportKey}`);
-        turfMenu.innerHTML = TURF_LIST.map(t => {
-           let isSel = sportState[sportKey].turf === t;
-           return `<button type="button" onclick="selectLocalDropdown('${sportKey}', 'turf', '${t}', '${t}')" class="w-full flex items-center justify-between px-4 py-3 font-roboto text-[16px] text-app-text hover:bg-gray-50 ${isSel ? 'bg-gray-50' : ''}">
-              <span>${t}</span>
-              <svg class="${isSel ? '' : 'hidden'}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-           </button>`;
-        }).join('');
-
-        const startMenu = document.getElementById(`start-menu-${sportKey}`);
-        startMenu.innerHTML = TIME_OPTIONS.map(opt => {
-           let isSel = sportState[sportKey].start === opt.value;
-           return `<button type="button" onclick="selectLocalDropdown('${sportKey}', 'start', '${opt.value}', '${opt.label}')" class="w-full flex items-center justify-between px-4 py-3 h-[48px] font-roboto text-[16px] text-app-text hover:bg-gray-50 ${isSel ? 'bg-gray-50' : ''}">
-              <span>${opt.label}</span>
-              <svg class="${isSel ? '' : 'hidden'}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-           </button>`;
-        }).join('');
-
-        const endMenu = document.getElementById(`end-menu-${sportKey}`);
-        endMenu.innerHTML = TIME_OPTIONS.map(opt => {
-           let isSel = sportState[sportKey].end === opt.value;
-           return `<button type="button" onclick="selectLocalDropdown('${sportKey}', 'end', '${opt.value}', '${opt.label}')" class="w-full flex items-center justify-between px-4 py-3 h-[48px] font-roboto text-[16px] text-app-text hover:bg-gray-50 ${isSel ? 'bg-gray-50' : ''}">
-              <span>${opt.label}</span>
-              <svg class="${isSel ? '' : 'hidden'}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-           </button>`;
-        }).join('');
+      function removeSportFromTurf(tid, sport) {
+          const turf = activeTurfs[tid];
+          turf.selectedSports = turf.selectedSports.filter(s => s !== sport);
+          delete turf.sportState[sport];
+          const elem = document.getElementById(`sport-acc-${tid}-${sport.replace(/\s+/g, '')}`);
+          if (elem) elem.remove();
+          renderTurfSportsMenu(tid);
       }
 
-      function toggleLocalDropdown(sportKey, type) {
-        const currentlyOpen = sportState[sportKey][`${type}Open`];
-        closeAllDropdowns();
-        
-        if (!currentlyOpen) {
-            document.getElementById(`${type}-menu-${sportKey}`).classList.remove('hidden');
-            if (type === 'turf') document.getElementById(`turf-chevron-${sportKey}`).style.transform = "rotate(180deg)";
-            sportState[sportKey][`${type}Open`] = true;
-        }
+      function closeDiscardSport() { closeSheet('discard-sport'); pendingDiscardTid = null; pendingDiscardSport = null; }
+      function confirmDiscardSport() {
+          if(pendingDiscardTid && pendingDiscardSport){
+             removeSportFromTurf(pendingDiscardTid, pendingDiscardSport);
+          }
+          closeDiscardSport();
       }
 
-      function selectLocalDropdown(sportKey, type, value, label) {
-        document.getElementById(`${type}-menu-${sportKey}`).classList.add('hidden');
-        sportState[sportKey][`${type}Open`] = false;
+      function addSportDOMToTurf(tid, sport) {
+          const safeSport = sport.replace(/\s+/g, '');
+          const cId = `${tid}-${safeSport}`; 
+          
+          const container = document.getElementById(`sports-container-${tid}`);
+          const div = document.createElement('div');
+          div.id = `sport-acc-${cId}`;
+          div.className = "flex flex-col border border-app-border rounded-[8px] bg-white overflow-visible animate-fade-in";
 
-        sportState[sportKey][type] = value;
-        
-        const lblTarget = document.getElementById(`${type}-label-${sportKey}`);
-        lblTarget.textContent = label;
-        lblTarget.style.color = "rgba(15,15,15,1)";
-        
-        if (type === 'turf') {
-            document.getElementById(`turf-chevron-${sportKey}`).style.transform = "";
-        }
-        
-        buildMenusForSport(sportKey);
+          div.innerHTML = `
+            <button type="button" onclick="toggleSportInnerAccordion('${cId}')" class="flex items-center justify-between w-full h-[52px] px-4 bg-[#f8f9fa] rounded-t-[8px] border-b border-app-border active:bg-gray-100 transition-colors">
+               <span class="font-inter font-semibold text-[15px] text-app-heading">${sport}</span>
+               <svg id="sport-chev-${cId}" class="transition-transform duration-200" style="transform: rotate(180deg);" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9L12 15L18 9"/></svg>
+            </button>
+            <div id="sport-content-${cId}" class="flex flex-col gap-4 p-4 rounded-b-[8px]">
+               
+               <div class="flex flex-col gap-2">
+                 <label class="font-inter text-[14px] font-semibold text-app-heading">Nickname</label>
+                 <input id="input-nickname-${cId}" type="text" placeholder="Nickname" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text outline-none focus:border-app-heading transition-colors" />
+               </div>
+
+               <div class="flex flex-col gap-2">
+                 <label class="font-inter text-[14px] font-semibold text-app-heading">Sport id</label>
+                 <input id="input-sid-${cId}" type="text" placeholder="Sport id" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text outline-none focus:border-app-heading transition-colors" />
+               </div>
+
+               <div class="flex flex-col gap-2 relative stop-global-click">
+                  <label class="font-inter text-[14px] font-semibold text-app-heading">Start Time</label>
+                  <button type="button" onclick="toggleTimeMenu('${tid}', '${sport}', 'start')" class="w-full flex items-center justify-between h-[52px] px-3 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors">
+                    <span id="lbl-start-${cId}" class="font-roboto text-[16px] text-app-placeholder">Select Start Time</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4d4d4d" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                  </button>
+                  <div id="menu-start-${cId}" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-30 shadow-lg overflow-y-auto max-h-[220px] scrollbar-hide py-1"></div>
+               </div>
+
+               <div class="flex flex-col gap-2 relative stop-global-click">
+                  <label class="font-inter text-[14px] font-semibold text-app-heading">End Time</label>
+                  <button type="button" onclick="toggleTimeMenu('${tid}', '${sport}', 'end')" class="w-full flex items-center justify-between h-[52px] px-3 rounded-[8px] border border-app-border bg-white focus:outline-none transition-colors">
+                    <span id="lbl-end-${cId}" class="font-roboto text-[16px] text-app-placeholder">Select End Time</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4d4d4d" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                  </button>
+                  <div id="menu-end-${cId}" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-app-border rounded-[8px] z-30 shadow-lg overflow-y-auto max-h-[220px] scrollbar-hide py-1"></div>
+               </div>
+
+               <div class="flex flex-col gap-2">
+                 <label class="font-inter text-[14px] font-semibold text-app-heading">Sport Duration</label>
+                 <input id="input-dur-${cId}" type="number" placeholder="Duration (mins)" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text outline-none focus:border-app-heading transition-colors" />
+               </div>
+
+               <div class="flex flex-col gap-2">
+                 <label class="font-inter text-[14px] font-semibold text-app-heading">Minimum Amount</label>
+                 <input id="input-amt-${cId}" type="number" placeholder="Amount" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text outline-none focus:border-app-heading transition-colors" />
+               </div>
+
+               <div class="flex flex-col gap-2">
+                 <label class="font-inter text-[14px] font-semibold text-app-heading">Minimum Booking Slot</label>
+                 <input id="input-slot-${cId}" type="number" placeholder="Slots" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] text-app-text outline-none focus:border-app-heading transition-colors" />
+               </div>
+
+               <div class="flex flex-col gap-2">
+                  <label class="font-inter text-[14px] font-semibold text-app-heading">Images</label>
+                  <label class="flex items-center justify-center w-full h-[52px] rounded-[8px] border border-app-border bg-white text-app-sub font-inter text-[15px] font-medium active:bg-gray-50 transition-colors cursor-pointer">
+                    Select Image
+                    <input type="file" id="img-in-${cId}" class="hidden" accept="image/*" multiple onchange="handleSportImageUpload(event, '${cId}')" />
+                  </label>
+                  <div id="img-thumb-${cId}" class="flex gap-2 overflow-x-auto scrollbar-hide py-1 empty:hidden"></div>
+               </div>
+
+            </div>
+          `;
+          container.appendChild(div);
+          renderTimeMenu(tid, sport, 'start');
+          renderTimeMenu(tid, sport, 'end');
       }
 
-      /* ═══════════════ GLOBAL UTILS ═══════════════ */
+      function toggleSportInnerAccordion(cId) {
+          const content = document.getElementById(`sport-content-${cId}`);
+          const chev = document.getElementById(`sport-chev-${cId}`);
+          if (content.classList.contains('hidden')) {
+              content.classList.remove('hidden');
+              chev.style.transform = "rotate(180deg)";
+          } else {
+              content.classList.add('hidden');
+              chev.style.transform = "rotate(0deg)";
+          }
+      }
+
+      function handleSportImageUpload(e, cId) {
+         const files = e.target.files;
+         const container = document.getElementById(`img-thumb-${cId}`);
+         if (!files) return;
+         Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+               const div = document.createElement('div');
+               div.className = "relative flex items-center justify-center w-[64px] h-[64px] rounded-[8px] overflow-hidden shrink-0 border border-app-border group bg-gray-100";
+               div.innerHTML = `
+                   <img src="${ev.target.result}" class="w-full h-full object-cover" />
+                   <button type="button" onclick="this.parentElement.remove()" class="absolute top-1 right-1 bg-white/90 rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pb-0.5 text-red-500 shadow-sm">
+                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                   </button>
+               `;
+               container.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+         });
+         e.target.value = '';
+      }
+
+      /* --- TIME DROPWDOWNS --- */
+      function renderTimeMenu(tid, sport, type) {
+          const cId = `${tid}-${sport.replace(/\s+/g, '')}`;
+          const menu = document.getElementById(`menu-${type}-${cId}`);
+          const val = activeTurfs[tid].sportState[sport][type];
+
+          menu.innerHTML = TIME_OPTIONS.map(opt => {
+             const isSel = val === opt.value;
+             return `<button type="button" onclick="selectTime('${tid}', '${sport}', '${type}', '${opt.value}', '${opt.label}')" class="w-full flex items-center justify-between px-4 py-3 h-[48px] font-roboto text-[16px] text-app-text hover:bg-gray-50 ${isSel?'bg-gray-50':''}">
+                <span>${opt.label}</span>
+                <svg class="${isSel?'':'hidden'}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+             </button>`;
+          }).join('');
+      }
+
+      function toggleTimeMenu(tid, sport, type) {
+          closeAllDropdowns();
+          const cId = `${tid}-${sport.replace(/\s+/g, '')}`;
+          document.getElementById(`menu-${type}-${cId}`).classList.remove('hidden');
+      }
+
+      function selectTime(tid, sport, type, val, label) {
+          activeTurfs[tid].sportState[sport][type] = val;
+          const cId = `${tid}-${sport.replace(/\s+/g, '')}`;
+          
+          const lblTarget = document.getElementById(`lbl-${type}-${cId}`);
+          lblTarget.textContent = label;
+          lblTarget.style.color = "#1a1a1a";
+          
+          document.getElementById(`menu-${type}-${cId}`).classList.add('hidden');
+          renderTimeMenu(tid, sport, type);
+      }
+
+      /* --- GLOBAL LOGIC --- */
       function closeAllDropdowns() {
-        mainSportsOpen = false;
-        document.getElementById("main-sports-menu")?.classList.add("hidden");
-        const mc = document.getElementById("main-sports-chevron");
-        if(mc) mc.style.transform = "";
-
-        Object.keys(sportState).forEach(key => {
-            ['turf', 'start', 'end'].forEach(type => {
-                sportState[key][`${type}Open`] = false;
-                document.getElementById(`${type}-menu-${key}`)?.classList.add('hidden');
-                if (type === 'turf') {
-                    const chev = document.getElementById(`turf-chevron-${key}`);
-                    if (chev) breakTransform(chev);
-                }
-            });
-        });
+          document.querySelectorAll('[id^="sports-menu-"], [id^="menu-start-"], [id^="menu-end-"]').forEach(el => {
+             el.classList.add('hidden');
+          });
+          document.querySelectorAll('[id^="sports-chevron-"]').forEach(el => {
+             el.style.transform = '';
+          });
       }
-
-      function breakTransform(el) {
-          el.style.transform = "";
-      }
-
-      document.addEventListener("click", e => {
-        if (!e.target.closest('.stop-global-click')) {
-            closeAllDropdowns();
-        }
+      document.addEventListener('click', e => {
+          if(!e.target.closest('.stop-global-click')) closeAllDropdowns();
       });
 
-      function scrollToField(el) {
-        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 320);
+      /* --- SHEET UTILS --- */
+      function openSheet(id) {
+          const backdrop = document.getElementById(`${id}-backdrop`);
+          const sheet = document.getElementById(`${id}-sheet`);
+          if(!backdrop || !sheet) return;
+          backdrop.classList.remove('hidden', 'backdrop-exit');
+          sheet.classList.remove('hidden', 'sheet-exit');
+          backdrop.classList.add('backdrop-enter');
+          sheet.classList.add('sheet-enter');
+      }
+      function closeSheet(id) {
+          const backdrop = document.getElementById(`${id}-backdrop`);
+          const sheet = document.getElementById(`${id}-sheet`);
+          if(!backdrop || !sheet) return;
+          backdrop.classList.remove('backdrop-enter');
+          sheet.classList.remove('sheet-enter');
+          backdrop.classList.add('backdrop-exit');
+          sheet.classList.add('sheet-exit');
+          setTimeout(() => {
+              backdrop.classList.add('hidden');
+              sheet.classList.add('hidden');
+          }, 260);
       }
 
-      /* ═══════════════ CONFIRM ═══════════════ */
       function handleConfirm() {
-        const payload = selectedSports.map(sport => {
-            const safeSport = sport.replace(/\s+/g,'');
-            return {
-                sportName: sport,
-                nickname:  document.getElementById(`nickname-${safeSport}`)?.value.trim() || '',
-                turfList:  sportState[safeSport]?.turf || '',
-                sportId:   document.getElementById(`sportId-${safeSport}`)?.value.trim() || '',
-                startTime: sportState[safeSport]?.start || '',
-                endTime:   sportState[safeSport]?.end || '',
-                duration:  document.getElementById(`duration-${safeSport}`)?.value.trim() || '',
-                minAmount: document.getElementById(`minAmount-${safeSport}`)?.value.trim() || '',
-            };
-        });
-        console.log("Turf With Sports payload:", payload);
-        /* TODO: wire to API */
+          alert("Confirmed! Check console for payload.");
+          console.log({
+             globalImages: document.getElementById('global-image-thumbnails').children.length,
+             turfs: activeTurfs
+          });
       }
     </script>
   </body>

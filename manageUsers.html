@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>List Username – Fabzia Admin</title>
+    <meta name="description" content="View, search, edit and manage users." />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter + Roboto -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Utility CSS (design tokens) -->
+    <link rel="stylesheet" href="utility.css" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "app-bg":          "hsl(0,0%,96%)",
+              "app-heading":     "#0f172a",
+              "app-text":        "#1a1a1a",
+              "app-placeholder": "#ababab",
+              "app-border":      "#d7d7d7",
+              "app-icon":        "#64748b",
+              "app-btn":         "#125dcd",
+            },
+            fontFamily: {
+              inter:  ["Inter",  "sans-serif"],
+              roboto: ["Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* ── Animations ── */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in { animation: fadeIn 0.18s ease-out forwards; }
+
+      /* ── Bottom sheet slide-up ── */
+      @keyframes slideUp {
+        from { transform: translateY(100%); opacity: 0; }
+        to   { transform: translateY(0);   opacity: 1; }
+      }
+      @keyframes slideDown {
+        from { transform: translateY(0);   opacity: 1; }
+        to   { transform: translateY(100%); opacity: 0; }
+      }
+      .sheet-enter { animation: slideUp   0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+      .sheet-exit  { animation: slideDown 0.25s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+
+      /* ── Backdrop fade ── */
+      @keyframes backdropIn  { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes backdropOut { from { opacity: 1; } to { opacity: 0; } }
+      .backdrop-enter { animation: backdropIn  0.3s ease forwards; }
+      .backdrop-exit  { animation: backdropOut 0.25s ease forwards; }
+
+      /* ── Scrollbar hide ── */
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+      /* ── Accordion transitions ── */
+      .accordion-content {
+        transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+      }
+      .accordion-content.open {
+        opacity: 1;
+        overflow: visible;
+      }
+
+      /* Checkbox accent */
+      input[type="checkbox"] {
+        accent-color: #125dcd;
+      }
+    </style>
+  </head>
+
+  <body class="flex justify-center min-h-screen" style="background:hsl(0,0%,96%)">
+    <!-- ── Outer wrapper (max 430 px) ── -->
+    <div id="app" class="w-full max-w-[430px] min-h-screen flex flex-col relative" style="background:hsl(0,0%,96%)">
+
+      <!-- ── Sticky Nav Bar ── -->
+      <div class="sticky top-0 z-30 flex items-center justify-between px-1 py-2 border-b border-app-border bg-white pr-4">
+        <div class="flex items-center gap-2">
+          <button
+            onclick="window.location.href='home.html'"
+            aria-label="Go back"
+            class="w-12 h-12 flex items-center justify-center rounded-full active:bg-gray-100 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+              class="text-app-heading">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <span class="font-inter text-[18px] font-normal leading-[28px] tracking-[0.04px] text-app-heading">
+            List Username
+          </span>
+        </div>
+      </div>
+
+      <!-- ── Scrollable Body ── -->
+      <div class="flex flex-col px-5 pt-5 pb-10 gap-5">
+
+        <!-- ── Select User Field ── -->
+        <div class="flex flex-col gap-2 w-full relative z-20">
+          <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Select User</label>
+          <div class="flex items-center gap-2 relative">
+            <input
+              id="user-input"
+              type="text"
+              placeholder="Enter User id"
+              oninput="handleSearchInput(this.value)"
+              onfocus="handleSearchFocus()"
+              class="h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors flex-1 focus:border-app-heading focus:outline-none"
+            />
+            <button type="button" onclick="addSelectedUser()" class="h-[52px] px-5 bg-app-btn text-white rounded-[8px] font-inter text-[16px] font-semibold active:opacity-90 transition-opacity">
+              Add
+            </button>
+            <!-- Suggestions Dropdown -->
+            <div
+              id="search-suggestions"
+              class="absolute top-[56px] left-0 right-[80px] bg-white border border-app-border rounded-[8px] shadow-lg max-h-[200px] overflow-y-auto animate-fade-in hidden"
+            >
+              <!-- Suggestions injected dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Users Accordion List ── -->
+        <div id="users-list" class="flex flex-col gap-3">
+          <!-- Users injected dynamically -->
+        </div>
+
+      </div><!-- /scrollable body -->
+
+    </div><!-- /app -->
+
+    <!-- ══════════════════════════════════════════════════════
+         TURF SELECTION BOTTOM SHEET
+    ══════════════════════════════════════════════════════ -->
+    <div
+      id="turf-backdrop"
+      class="hidden fixed inset-0 z-40 bg-black/40"
+      onclick="closeTurfSheet()"
+    ></div>
+
+    <div
+      id="turf-sheet"
+      class="hidden fixed bottom-0 left-0 right-0 z-50 w-full max-w-[430px] mx-auto bg-white rounded-t-2xl shadow-2xl flex flex-col h-[85vh]"
+      style="padding-bottom: env(safe-area-inset-bottom, 0px);"
+    >
+      <!-- Drag handle -->
+      <div class="flex justify-center pt-3 pb-1 shrink-0">
+        <div class="w-10 h-1 rounded-full bg-gray-200"></div>
+      </div>
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-5 py-3 border-b border-app-border shrink-0">
+        <span class="font-inter text-[16px] font-semibold text-app-heading">Select Turfs</span>
+        <button onclick="closeTurfSheet()" class="w-8 h-8 flex items-center justify-center text-app-icon rounded-full active:bg-gray-100 transition-colors">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Turf Search -->
+      <div class="p-4 shrink-0">
+        <div class="relative">
+          <input
+            type="text"
+            placeholder="Search turf..."
+            oninput="filterTurfs(this.value)"
+            class="w-full h-[48px] pl-10 pr-3 border border-app-border rounded-[8px] bg-gray-50 focus:bg-white focus:outline-none focus:border-app-heading transition-colors text-[16px] font-roboto"
+          />
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-app-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Turf List (Scrollable) -->
+      <div class="flex-1 overflow-y-auto px-4 pb-4 flex flex-col gap-5 scrollbar-hide">
+        
+        <!-- Frequently Searched -->
+        <div id="freq-searched-container">
+          <h3 class="font-inter text-[12px] font-semibold text-app-icon tracking-wider uppercase mb-3 px-1">
+            Frequently Searched
+          </h3>
+          <div class="flex flex-col gap-1 border border-app-border rounded-[8px] overflow-hidden">
+            <label class="flex items-center gap-3 px-3 py-3 hover:bg-gray-50 cursor-pointer border-b border-app-border last:border-0 transition-colors">
+              <input type="checkbox" value="Green Valley" class="w-5 h-5 rounded turf-cb" />
+              <span class="font-roboto text-[16px] text-app-text">Green Valley</span>
+            </label>
+            <label class="flex items-center gap-3 px-3 py-3 hover:bg-gray-50 cursor-pointer border-b border-app-border last:border-0 transition-colors">
+              <input type="checkbox" value="Strikers Arena" class="w-5 h-5 rounded turf-cb" />
+              <span class="font-roboto text-[16px] text-app-text">Strikers Arena</span>
+            </label>
+            <label class="flex items-center gap-3 px-3 py-3 hover:bg-gray-50 cursor-pointer border-b border-app-border last:border-0 transition-colors">
+              <input type="checkbox" value="KickOff Turf" class="w-5 h-5 rounded turf-cb" />
+              <span class="font-roboto text-[16px] text-app-text">KickOff Turf</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- All Turfs (A-Z) -->
+        <div>
+          <h3 class="font-inter text-[12px] font-semibold text-app-icon tracking-wider uppercase mb-3 px-1">
+            All Turfs (A-Z)
+          </h3>
+          <div id="all-turfs-list" class="flex flex-col border border-app-border rounded-[8px] overflow-hidden">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+      </div><!-- /scrollable -->
+
+      <!-- Confirm Button -->
+      <div class="p-4 border-t border-app-border shrink-0 bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+        <button
+          onclick="confirmVenueSelection()"
+          class="w-full h-[52px] bg-app-btn text-white rounded-[8px] font-inter text-[16px] font-semibold transition-opacity active:opacity-90"
+        >
+          Assign Selected Turfs
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ── Delete Confirmation Bottom Sheet ── -->
+    <div
+      id="delete-backdrop"
+      class="hidden fixed inset-0 z-[100] bg-black/40"
+      onclick="closeDeletePopup()"
+    ></div>
+
+    <div
+      id="delete-sheet"
+      class="hidden fixed bottom-0 left-0 right-0 z-[110] w-full max-w-[430px] mx-auto bg-white rounded-t-2xl shadow-2xl flex flex-col pt-2 px-6"
+      style="padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));"
+    >
+      <!-- Drag handle -->
+      <div class="flex justify-center pt-3 pb-4 shrink-0">
+        <div class="w-10 h-1 rounded-full bg-gray-200"></div>
+      </div>
+      
+      <h3 class="font-inter text-[18px] font-semibold text-app-heading text-left mb-6 leading-snug">
+        Are you sure you want to delete user?
+      </h3>
+      <div class="flex items-center gap-3">
+        <button onclick="closeDeletePopup()" class="flex-1 h-[48px] rounded-[8px] border border-app-border bg-white text-app-heading font-inter text-[16px] font-semibold active:bg-gray-50 transition-colors">
+          No
+        </button>
+        <button onclick="confirmDeleteUser()" class="flex-1 h-[48px] rounded-[8px] bg-red-500 text-white font-inter text-[16px] font-semibold active:opacity-90 transition-opacity">
+          Yes
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════
+         SCRIPTS
+    ══════════════════════════════════════════════════════ -->
+    <script>
+      /* ── Mock Data ── */
+      let users = [
+        {
+          id: 'USR001',
+          name: 'John Doe',
+          password: 'password123',
+          phone: '9876543210',
+          role: 'ADMIN',
+          venues: ['Green Valley']
+        },
+        {
+          id: 'USR002',
+          name: 'Alice Walker',
+          password: 'secretpass!!',
+          phone: '9123456780',
+          role: 'VENDOR',
+          venues: ['KickOff Turf', 'Strikers Arena']
+        },
+        {
+          id: 'USR003',
+          name: 'Bob Smith',
+          password: 'letmein123',
+          phone: '8765432109',
+          role: 'VENDOR',
+          venues: []
+        }
+      ];
+
+      const ALL_TURFS = [
+        "A-One Sportsplex", "Alpha Arena", "Bayside Turf", "Crescent Fields", 
+        "Delta Sports", "Elite Turf", "Green Valley", "Goalden Ground",
+        "KickOff Turf", "Lightning Arena", "MatchPoint Turf", "Nova Fields",
+        "Pinnacle Pitch", "Royal Turf", "Strikers Arena", "Titan Turf", "Zeta Sports"
+      ];
+
+      /* ── State ── */
+      let activeUserIdForTurf = null;
+      let roleDropdownOpenId = null;
+      let activeUsersToManage = []; // Users added to the screen
+      let userToDelete = null;
+
+      /* ── Initialization ── */
+      document.addEventListener('DOMContentLoaded', () => {
+        renderUsersList();
+        renderAllTurfs();
+        
+        // Close role dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.role-dropdown-container')) {
+            closeAllRoleDropdowns();
+          }
+          if (!e.target.closest('#user-input') && !e.target.closest('#search-suggestions')) {
+            const sugg = document.getElementById('search-suggestions');
+            if(sugg) sugg.classList.add('hidden');
+          }
+        });
+      });
+
+
+      /* ── Users Rendering ── */
+      function renderUsersList() {
+        const container = document.getElementById('users-list');
+        container.innerHTML = '';
+        
+        if (activeUsersToManage.length === 0) {
+          container.innerHTML = `
+            <div class="py-10 text-center flex flex-col items-center gap-2">
+              <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+                <svg class="text-app-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <span class="font-inter text-[15px] font-medium text-app-heading">No users added</span>
+              <span class="font-roboto text-[14px] text-app-placeholder">Search and add a user to manage their details.</span>
+            </div>
+          `;
+          return;
+        }
+
+        activeUsersToManage.forEach(user => {
+          // Accordion Item
+          const html = `
+            <div class="bg-white rounded-[8px] border border-app-border overflow-visible" id="user-card-${user.id}">
+              <!-- Header -->
+              <button 
+                class="w-full flex items-center justify-between p-4 focus:outline-none hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-[8px]"
+                onclick="toggleAccordion('${user.id}')"
+              >
+                <div class="flex flex-col text-left gap-1 cursor-pointer">
+                  <span class="font-inter text-[16px] font-semibold text-app-heading">${user.name}</span>
+                  <div class="flex items-center gap-2">
+                    <span class="font-roboto text-[12px] text-app-placeholder bg-gray-100 px-1.5 py-0.5 rounded">${user.id}</span>
+                    <span class="font-inter text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded text-white ${user.role === 'ADMIN' ? 'bg-indigo-500' : 'bg-teal-500'}">${user.role}</span>
+                    <span class="font-roboto text-[13px] text-app-icon">+91 ${user.phone}</span>
+                  </div>
+                </div>
+                <svg id="chevron-${user.id}" class="transition-transform duration-300 text-app-icon shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- Edit Content -->
+              <div id="content-${user.id}" class="accordion-content relative z-10 bg-white">
+                <div class="p-4 border-t border-app-border flex flex-col gap-5">
+                  
+                  <!-- Username -->
+                  <div class="flex flex-col gap-2">
+                    <label class="font-inter text-[13px] font-semibold text-app-heading">User Name</label>
+                    <input type="text" id="uname-${user.id}" value="${user.name}" class="w-full h-[48px] px-3 border border-app-border rounded-[8px] font-roboto text-[15px] focus:border-black focus:outline-none transition-colors" />
+                  </div>
+
+                  <!-- Password -->
+                  <div class="flex flex-col gap-2">
+                    <label class="font-inter text-[13px] font-semibold text-app-heading">Password</label>
+                    <div class="flex items-center border border-app-border rounded-[8px] bg-white pr-2 focus-within:border-black transition-colors">
+                      <input type="password" id="upass-${user.id}" value="${user.password}" class="w-full h-[48px] px-3 rounded-l-[8px] font-roboto text-[15px] focus:outline-none" />
+                      <button type="button" onclick="togglePass('${user.id}')" class="p-2 text-app-icon active:bg-gray-100 rounded">
+                        <svg class="eye-on-${user.id}" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <svg class="eye-off-${user.id} hidden" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.94 17.94A10.06 10.06 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Phone Number -->
+                  <div class="flex flex-col gap-2">
+                    <label class="font-inter text-[13px] font-semibold text-app-heading">Phone Number</label>
+                    <div class="flex items-center border border-app-border rounded-[8px] bg-white focus-within:border-black transition-colors">
+                      <div class="px-3 py-3 border-r border-app-border text-app-text font-roboto text-[15px]">+91</div>
+                      <input type="tel" id="uphone-${user.id}" value="${user.phone}" class="w-full h-[48px] px-3 rounded-r-[8px] font-roboto text-[15px] focus:outline-none" />
+                    </div>
+                  </div>
+
+                  <!-- User Role -->
+                  <div class="flex flex-col gap-2 relative role-dropdown-container">
+                    <label class="font-inter text-[13px] font-semibold text-app-heading">User Role</label>
+                    <button 
+                      type="button" 
+                      onclick="toggleRoleMenu('${user.id}')"
+                      class="flex items-center justify-between w-full h-[48px] px-3 border border-app-border bg-white rounded-[8px] font-roboto text-[15px] text-app-text focus:border-black transition-colors"
+                    >
+                      <span id="role-label-${user.id}">${user.role}</span>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-app-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    <!-- Role Dropdown -->
+                    <div id="role-menu-${user.id}" class="hidden absolute top-[74px] left-0 right-0 bg-white border border-app-border rounded-[8px] shadow-lg z-20 overflow-hidden">
+                      <button onclick="selectRole('${user.id}', 'ADMIN')" class="w-full text-left px-4 py-3 hover:bg-gray-50 active:bg-gray-100 font-roboto text-[15px] border-b border-app-border text-app-text">ADMIN</button>
+                      <button onclick="selectRole('${user.id}', 'VENDOR')" class="w-full text-left px-4 py-3 hover:bg-gray-50 active:bg-gray-100 font-roboto text-[15px] text-app-text">VENDOR</button>
+                    </div>
+                  </div>
+
+                  <!-- Assign Venue -->
+                  <div class="flex flex-col gap-2">
+                    <label class="font-inter text-[13px] font-semibold text-app-heading">Assign Venue</label>
+                    <button 
+                      onclick="openTurfSheet('${user.id}')"
+                      class="w-full flex items-center justify-between h-[48px] px-3 border border-app-btn text-app-btn rounded-[8px] font-inter text-[15px] font-medium bg-blue-50/30 hover:bg-blue-50 active:bg-blue-100 transition-colors"
+                    >
+                      <span>Select Venue (Turfs)</span>
+                      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+
+                    <!-- Assigned Turfs Badges -->
+                    <div id="venues-list-${user.id}" class="flex flex-wrap gap-2 mt-1">
+                       ${renderVenueBadges(user.venues)}
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex gap-3 pt-3">
+                    <button onclick="deleteUser('${user.id}')" class="flex-1 py-3 bg-red-50 text-red-600 font-inter text-[15px] font-semibold rounded-[8px] border border-red-200 active:bg-red-100 transition-colors tracking-wide">
+                      Delete User
+                    </button>
+                    <button onclick="saveUser('${user.id}')" class="flex-1 py-3 bg-app-btn text-white font-inter text-[15px] font-semibold rounded-[8px] active:opacity-90 transition-opacity tracking-wide shadow-sm">
+                      Save Details
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          `;
+          container.insertAdjacentHTML('beforeend', html);
+        });
+      }
+
+      function renderVenueBadges(venuesArr) {
+        if (!venuesArr || venuesArr.length === 0) {
+          return `<span class="text-app-icon font-roboto text-[13px] italic">No venues assigned</span>`;
+        }
+        return venuesArr.map(v => 
+          `<span class="bg-gray-100 border border-gray-200 text-app-text px-2.5 py-1 rounded-md font-roboto text-[13px]">${v}</span>`
+        ).join('');
+      }
+
+      /* ── Interactions ── */
+      function toggleAccordion(uid) {
+        const content = document.getElementById(`content-${uid}`);
+        const chevron = document.getElementById(`chevron-${uid}`);
+        
+        if (content.classList.contains('open')) {
+          content.style.maxHeight = '0px';
+          content.classList.remove('open');
+          chevron.style.transform = 'rotate(0deg)';
+        } else {
+          // Close others first (Optional)
+          /* 
+          document.querySelectorAll('.accordion-content.open').forEach(el => {
+            el.style.maxHeight = '0px';
+            el.classList.remove('open');
+            const otherUiD = el.id.split('-')[1];
+            document.getElementById(`chevron-${otherUiD}`).style.transform = 'rotate(0deg)';
+          });
+          */
+
+          content.classList.add('open');
+          content.style.maxHeight = content.scrollHeight + 'px';
+          chevron.style.transform = 'rotate(180deg)';
+
+          // Allow visible overflow for dropdown after animation
+          setTimeout(() => {
+             if (content.classList.contains('open')) {
+                content.style.maxHeight = 'none';
+             }
+          }, 300);
+        }
+      }
+
+      function togglePass(uid) {
+        const imp = document.getElementById(`upass-${uid}`);
+        const eOn = document.querySelector(`.eye-on-${uid}`);
+        const eOff = document.querySelector(`.eye-off-${uid}`);
+        if(imp.type === 'password') {
+          imp.type = 'text';
+          eOn.classList.add('hidden');
+          eOff.classList.remove('hidden');
+        } else {
+          imp.type = 'password';
+          eOn.classList.remove('hidden');
+          eOff.classList.add('hidden');
+        }
+      }
+
+      /* ── Custom Select Role ── */
+      function toggleRoleMenu(uid) {
+        closeAllRoleDropdowns();
+        const menu = document.getElementById(`role-menu-${uid}`);
+        if (roleDropdownOpenId !== uid) {
+          menu.classList.remove('hidden');
+          roleDropdownOpenId = uid;
+        } else {
+          roleDropdownOpenId = null;
+        }
+      }
+
+      function selectRole(uid, role) {
+        document.getElementById(`role-label-${uid}`).textContent = role;
+        closeAllRoleDropdowns();
+      }
+
+      function closeAllRoleDropdowns() {
+        document.querySelectorAll('[id^=role-menu-]').forEach(el => el.classList.add('hidden'));
+        roleDropdownOpenId = null;
+      }
+
+      /* ── Save/Delete ── */
+      function deleteUser(uid) {
+        userToDelete = uid;
+        const backdrop = document.getElementById('delete-backdrop');
+        const sheet    = document.getElementById('delete-sheet');
+        
+        backdrop.classList.remove('hidden', 'backdrop-exit');
+        sheet.classList.remove('hidden', 'sheet-exit');
+        backdrop.classList.add('backdrop-enter');
+        sheet.classList.add('sheet-enter');
+      }
+
+      function closeDeletePopup() {
+        const backdrop = document.getElementById('delete-backdrop');
+        const sheet    = document.getElementById('delete-sheet');
+        
+        backdrop.classList.remove('backdrop-enter');
+        sheet.classList.remove('sheet-enter');
+        backdrop.classList.add('backdrop-exit');
+        sheet.classList.add('sheet-exit');
+        
+        setTimeout(() => {
+          backdrop.classList.add('hidden');
+          sheet.classList.add('hidden');
+          userToDelete = null;
+        }, 260);
+      }
+
+      function confirmDeleteUser() {
+        if (!userToDelete) return;
+        activeUsersToManage = activeUsersToManage.filter(u => u.id !== userToDelete);
+        renderUsersList();
+        closeDeletePopup();
+      }
+
+      function saveUser(uid) {
+        // Collect data
+        const uname = document.getElementById(`uname-${uid}`).value;
+        const upass = document.getElementById(`upass-${uid}`).value;
+        const uphone = document.getElementById(`uphone-${uid}`).value;
+        const urole = document.getElementById(`role-label-${uid}`).textContent;
+        // venues untouched here, they are updated directly via bottom sheet
+
+        // Update mock data
+        const user = activeUsersToManage.find(u => u.id === uid);
+        if(user) {
+          user.name = uname;
+          user.password = upass;
+          user.phone = uphone;
+          user.role = urole;
+        }
+        
+        // Also update main Database
+        const dbUser = users.find(u => u.id === uid);
+        if(dbUser) {
+          dbUser.name = uname;
+          dbUser.password = upass;
+          dbUser.phone = uphone;
+          dbUser.role = urole;
+        }
+
+        alert('User details saved!');
+        renderUsersList(); // Re-render to show updated title
+      }
+
+      /* ── Search with Suggestions & Add ── */
+      function handleSearchInput(val) {
+        showSuggestions(val);
+      }
+
+      function handleSearchFocus() {
+        const val = document.getElementById('user-input').value;
+        showSuggestions(val);
+      }
+
+      function showSuggestions(val) {
+        const box = document.getElementById('search-suggestions');
+        if (!val.trim()) {
+          box.classList.add('hidden');
+          return;
+        }
+        
+        const suggestions = users.filter(u => 
+          u.id.toLowerCase().includes(val.toLowerCase()) || 
+          u.name.toLowerCase().includes(val.toLowerCase()) || 
+          u.phone.includes(val)
+        );
+
+        if (suggestions.length === 0) {
+          box.innerHTML = `<div class="px-4 py-3 text-[14px] text-app-placeholder font-inter text-center">No users found</div>`;
+          box.classList.remove('hidden');
+          return;
+        }
+
+        const html = suggestions.map(u => `
+          <div 
+            class="px-4 py-3 border-b border-app-border last:border-0 hover:bg-gray-50 active:bg-gray-100 cursor-pointer flex justify-between items-center"
+            onclick="selectSuggestion('${u.id}')"
+          >
+            <div class="flex flex-col">
+              <span class="font-inter text-[14px] font-medium text-app-heading">${u.name}</span>
+              <span class="font-roboto text-[12px] text-app-placeholder">${u.id}</span>
+            </div>
+            <span class="text-app-icon font-inter text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded ${u.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-700' : 'bg-teal-100 text-teal-700'}">${u.role}</span>
+          </div>
+        `).join('');
+
+        box.innerHTML = html;
+        box.classList.remove('hidden');
+      }
+
+      function selectSuggestion(id) {
+        const input = document.getElementById('user-input');
+        input.value = id;
+        document.getElementById('search-suggestions').classList.add('hidden');
+      }
+
+      function addSelectedUser() {
+        const input = document.getElementById('user-input');
+        const val = input.value.trim().toLowerCase();
+        
+        if (!val) return;
+
+        // Try to match the exact ID first
+        let matchedUser = users.find(u => u.id.toLowerCase() === val);
+        
+        // If no exact match by ID, maybe they typed the exact name
+        if (!matchedUser) {
+           matchedUser = users.find(u => u.name.toLowerCase() === val || u.phone === val);
+        }
+
+        if (matchedUser) {
+           // Prevent duplicate adds
+           if (!activeUsersToManage.some(u => u.id === matchedUser.id)) {
+              activeUsersToManage.push(matchedUser);
+           }
+           input.value = '';
+           document.getElementById('search-suggestions').classList.add('hidden');
+           renderUsersList();
+        } else {
+           alert("User not found matching that ID.");
+        }
+      }
+
+      /* ── Bottom Sheet (Assign Venue) ── */
+      function renderAllTurfs(filterText = '') {
+        const list = document.getElementById('all-turfs-list');
+        list.innerHTML = '';
+        
+        const filtered = ALL_TURFS.filter(t => t.toLowerCase().includes(filterText.toLowerCase()));
+        
+        if (filtered.length === 0) {
+          list.innerHTML = `<div class="p-4 text-center text-app-icon font-inter text-[14px]">No turfs found.</div>`;
+          return;
+        }
+        
+        // Group by alphabet for UX
+        let curLetter = '';
+        filtered.forEach(t => {
+          const letter = t.charAt(0).toUpperCase();
+          if (letter !== curLetter) {
+             curLetter = letter;
+             list.innerHTML += `<div class="bg-gray-100 font-inter font-bold text-[13px] text-app-heading px-3 py-1 border-b border-app-border">${curLetter}</div>`;
+          }
+          list.innerHTML += `
+            <label class="flex items-center gap-3 px-3 py-3 hover:bg-gray-50 cursor-pointer border-b border-app-border last:border-0 transition-colors">
+              <input type="checkbox" value="${t}" class="w-5 h-5 rounded turf-cb" />
+              <span class="font-roboto text-[16px] text-app-text">${t}</span>
+            </label>
+          `;
+        });
+      }
+
+      function filterTurfs(val) {
+        renderAllTurfs(val);
+        // Also toggle frequently searched visibility based on search
+        const freq = document.getElementById('freq-searched-container');
+        if (val.trim() === '') {
+          freq.style.display = 'block';
+        } else {
+          freq.style.display = 'none';
+        }
+        precheckTurfs(); // reapplies checkboxes
+      }
+
+      function openTurfSheet(uid) {
+        activeUserIdForTurf = uid;
+        const user = users.find(u => u.id === uid);
+        
+        // reset search
+        document.querySelector('#turf-sheet input[type="text"]').value = '';
+        filterTurfs('');
+
+        // Backdrop & Sheet Animations
+        const backdrop = document.getElementById('turf-backdrop');
+        const sheet    = document.getElementById('turf-sheet');
+        
+        backdrop.classList.remove('hidden', 'backdrop-exit');
+        sheet.classList.remove('hidden', 'sheet-exit');
+        backdrop.classList.add('backdrop-enter');
+        sheet.classList.add('sheet-enter');
+
+        // Check assigned venues
+        if (user && user.venues) {
+           setTimeout(() => precheckTurfs(), 50); // slight delay to let DOM render
+        }
+      }
+
+      function closeTurfSheet() {
+        const backdrop = document.getElementById('turf-backdrop');
+        const sheet    = document.getElementById('turf-sheet');
+        
+        backdrop.classList.remove('backdrop-enter');
+        sheet.classList.remove('sheet-enter');
+        backdrop.classList.add('backdrop-exit');
+        sheet.classList.add('sheet-exit');
+        
+        setTimeout(() => {
+          backdrop.classList.add('hidden');
+          sheet.classList.add('hidden');
+        }, 260);
+      }
+
+      function precheckTurfs() {
+        if (!activeUserIdForTurf) return;
+        const user = users.find(u => u.id === activeUserIdForTurf);
+        if(!user) return;
+
+        const checkboxes = document.querySelectorAll('.turf-cb');
+        checkboxes.forEach(cb => {
+          cb.checked = user.venues.includes(cb.value);
+        });
+      }
+
+      function confirmVenueSelection() {
+        if (!activeUserIdForTurf) return;
+        
+        // Collector Set to prevent duplicates if turf is in both Frequent and All
+        const selected = new Set();
+        document.querySelectorAll('.turf-cb:checked').forEach(cb => {
+          selected.add(cb.value);
+        });
+
+        // Update mocked user state
+        const user = users.find(u => u.id === activeUserIdForTurf);
+        if(user) {
+          user.venues = Array.from(selected);
+        }
+
+        // Render Badges
+        const badgesContainer = document.getElementById(`venues-list-${activeUserIdForTurf}`);
+        if(badgesContainer) {
+          badgesContainer.innerHTML = renderVenueBadges(user.venues);
+        }
+
+        // Update Content Max height if needed
+        const content = document.getElementById(`content-${activeUserIdForTurf}`);
+        if (content.classList.contains('open')) {
+          content.style.maxHeight = 'none'; // allow it to grow naturally
+        }
+        
+        closeTurfSheet();
+      }
+
+    </script>
+  </body>
+</html>
