@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Add Aggregators - Fabzia Admin</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="utility.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "app-bg":          "hsl(0,0%,96%)",
+              "app-heading":     "#1a1a1a",
+              "app-text":        "rgba(15,15,15,1)",
+              "app-sub":         "rgba(77,77,77,1)",
+              "app-placeholder": "rgba(171,171,171,1)",
+              "app-border":      "#d7d7d7",
+              "app-icon":        "#4d4d4d",
+              "app-btn":         "#125dcd",
+            },
+            fontFamily: {
+              inter:  ["Inter",  "sans-serif"],
+              roboto: ["Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    
+    <style>
+        .form-scroll-area { padding-bottom: 96px; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* BOTTOM SHEETS */
+        .bs-overlay { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.45); display:none; align-items:flex-end; justify-content:center; }
+        .bs-overlay.open { display:flex; }
+        .bs-panel { position:relative; width:100%; max-width:430px; background:#fff; border-radius:20px 20px 0 0; animation:bsSlideUp 0.3s cubic-bezier(0.4,0,0.2,1); max-height: 80vh; display: flex; flex-direction: column; }
+        @keyframes bsSlideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+        
+        .check-box { width:24px; height:24px; border-radius:4px; border:1.5px solid #d7d7d7; display:flex; align-items:center; justify-content:center; cursor: pointer; transition: all 0.2s; }
+        .check-box.active { border-color:#125dcd; background:#125dcd; }
+
+        /* Disable Number Input Arrows */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        input:focus, textarea:focus { border-color: #1a1a1a !important; outline: none; }
+
+        /* Turf card animations */
+        .turf-card {
+            animation: fadeSlideIn 0.25s cubic-bezier(0.4,0,0.2,1);
+        }
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Password toggle */
+        .password-toggle {
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+        .password-toggle:hover {
+            color: #1a1a1a;
+        }
+    </style>
+</head>
+<body class="bg-app-bg flex justify-center min-h-screen">
+    
+    <div id="app" class="w-full max-w-[430px] min-h-screen flex flex-col relative bg-white">
+        
+        <!-- Top Navigation -->
+        <div class="sticky top-0 z-30 flex items-center gap-2 px-1 py-2 border-b border-app-border bg-white h-16">
+            <button onclick="window.location.href='home.html'" aria-label="Go back" class="w-12 h-12 flex items-center justify-center shrink-0 rounded-full active:bg-gray-100 transition-colors">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M16.966 5.25L10.216 12L16.966 18.75L15.375 20.341L7.034 12L15.375 3.659L16.966 5.25Z"
+                    fill="#1A1A1A"/>
+                </svg>
+            </button>
+            <span class="font-inter text-[18px] font-normal leading-[28px] tracking-[0.04px] text-app-heading">
+                Add Aggregators
+            </span>
+        </div>
+
+        <!-- Form Section -->
+        <div class="flex-1 flex flex-col px-5 pt-5 form-scroll-area overflow-y-auto no-scrollbar">
+            <div class="flex flex-col gap-4">
+                
+                <!-- Aggregator Name -->
+                <div class="flex flex-col gap-2 w-full">
+                    <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Aggregator Name</label>
+                    <input type="text" id="aggregator-name" placeholder="Enter Aggregator Name" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors">
+                </div>
+
+                <!-- User Name -->
+                <div class="flex flex-col gap-2 w-full">
+                    <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">User Name</label>
+                    <input type="text" id="aggregator-username" placeholder="Enter User Name" class="w-full h-[52px] px-3 rounded-[8px] border border-app-border font-roboto text-[16px] font-normal leading-[24px] tracking-[0.5px] text-app-text placeholder:text-app-placeholder bg-white transition-colors">
+                </div>
+
+                <!-- Password -->
+                <div class="flex flex-col gap-2 w-full">
+                    <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Password</label>
+                    <div class="border border-app-border flex items-center px-3 h-[52px] rounded-[8px] w-full bg-white gap-2 transition-colors focus-within:border-[#1a1a1a]">
+                        <input type="password" id="aggregator-password" placeholder="Enter Password" class="w-full h-full font-roboto text-[16px] outline-none text-app-text bg-transparent placeholder:text-app-placeholder border-none focus:ring-0">
+                        <div class="password-toggle text-app-icon shrink-0" onclick="togglePassword()">
+                            <i data-lucide="eye-off" id="pw-icon-off" class="w-5 h-5"></i>
+                            <i data-lucide="eye" id="pw-icon-on" class="w-5 h-5 hidden"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Turf List -->
+                <div class="flex flex-col gap-2 w-full">
+                    <label class="font-inter text-[14px] font-semibold leading-[160%] tracking-[0.04px] text-app-heading">Turf List</label>
+                    <div class="border border-app-border flex items-center px-3 h-[52px] rounded-[8px] w-full bg-white relative cursor-pointer" onclick="openBS('turf-select')">
+                        <input type="text" id="turf-display" readonly placeholder="Select Turf" class="w-full h-full font-roboto text-[16px] font-normal text-app-text outline-none bg-transparent placeholder:text-app-placeholder pointer-events-none border-none focus:ring-0 cursor-pointer">
+                        <div class="absolute right-3 pointer-events-none text-app-icon">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Turf Cards with Nickname -->
+                <div id="selected-turfs-container" class="flex flex-col gap-3 w-full empty:hidden"></div>
+
+            </div>
+        </div>
+
+        <!-- Sticky Bottom Action Buttons -->
+        <div class="sticky bottom-0 z-30 w-full px-5 py-4 border-t border-app-border bg-white">
+            <div class="flex items-center gap-3">
+                <button onclick="showCancelPopup()" class="flex-1 flex justify-center items-center rounded-[8px] h-[52px] text-app-heading font-inter font-semibold text-[16px] border border-app-border bg-white active:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <button onclick="showSuccessToaster()" class="flex-1 flex justify-center items-center rounded-[8px] h-[52px] bg-app-btn text-white font-inter font-semibold text-[16px] active:opacity-90 transition-opacity">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         BOTTOM SHEETS
+    ═══════════════════════════════════════ -->
+
+    <!-- Turf Selection Sheet -->
+    <div id="bs-turf-select" class="bs-overlay" onclick="closeBS('turf-select')">
+        <div class="bs-panel !h-[70vh] !max-h-[70vh]" onclick="event.stopPropagation()">
+            <!-- Handle bar -->
+            <div class="flex justify-center pt-3 pb-1">
+              <div class="w-10 h-1 rounded-full bg-gray-200"></div>
+            </div>
+            <div class="flex items-center justify-between px-5 py-2 border-b border-app-border">
+                <h3 class="text-[16px] font-semibold text-app-heading font-inter">Select Turf</h3>
+                <button onclick="closeBS('turf-select')"><i data-lucide="x" class="w-5 h-5 text-app-heading"></i></button>
+            </div>
+            <div class="px-5 py-3 border-b border-app-border">
+                <div class="border border-app-border rounded-lg flex items-center px-3 h-[40px] bg-gray-50 focus-within:border-app-btn focus-within:bg-white transition-colors">
+                    <i data-lucide="search" class="w-4 h-4 text-app-placeholder"></i>
+                    <input type="text" id="turf-search" oninput="renderTurfs()" placeholder="Search Turf" class="w-full h-full bg-transparent outline-none ml-2 text-[14px] text-app-text font-roboto">
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto px-2 py-2 no-scrollbar" id="turf-list"></div>
+            <div class="p-4 border-t border-app-border mt-auto">
+                <button onclick="applyTurfSelect()" class="w-full h-[52px] rounded-[8px] bg-app-btn text-white font-inter font-semibold text-[16px] active:opacity-90 transition-opacity">
+                    Apply Selection
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Toaster -->
+    <div id="error-toaster" class="fixed top-4 left-1/2 -translate-x-1/2 bg-[#fee2e2] text-[#ef4444] px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 transition-transform duration-300 transform -translate-y-[150%] z-[200] w-[90%] max-w-[380px]">
+        <div class="w-6 h-6 rounded-full bg-[#ef4444] text-white flex items-center justify-center flex-shrink-0">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </div>
+        <span class="text-[14px] font-medium font-inter">Changes are Not updated!</span>
+    </div>
+
+    <!-- Success Toaster -->
+    <div id="success-toaster" class="fixed top-4 left-1/2 -translate-x-1/2 bg-[#dcfce7] text-[#22c55e] px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 transition-transform duration-300 transform -translate-y-[150%] z-[200] w-[90%] max-w-[380px]">
+        <div class="w-6 h-6 rounded-full bg-[#22c55e] text-white flex items-center justify-center flex-shrink-0">
+            <i data-lucide="check" class="w-4 h-4"></i>
+        </div>
+        <span class="text-[14px] font-medium font-inter">Aggregator has been saved Successfully</span>
+    </div>
+
+    <!-- Cancel Confirmation Sheet -->
+    <div id="bs-cancel-confirm" class="bs-overlay" onclick="closeBS('cancel-confirm')" style="z-index: 105;">
+        <div class="bs-panel !rounded-t-[20px] !max-h-auto" onclick="event.stopPropagation()">
+            <div class="p-6 flex flex-col gap-4">
+                <h3 class="text-[18px] font-semibold text-app-heading text-left font-inter">Are you sure you want to Cancel Changes ?</h3>
+                <div class="flex items-center gap-3 mt-2">
+                    <button onclick="closeBS('cancel-confirm')" class="flex-1 h-[48px] rounded-[8px] text-app-heading font-semibold text-[16px] font-inter border border-app-border active:bg-gray-50 transition-colors">
+                        No
+                    </button>
+                    <button onclick="confirmCancel()" class="flex-1 h-[48px] rounded-[8px] bg-[#ef4444] text-white font-semibold text-[16px] font-inter active:opacity-90 transition-colors">
+                        Cancel Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+
+        /* Password Toggle */
+        function togglePassword() {
+            const input = document.getElementById('aggregator-password');
+            const iconOff = document.getElementById('pw-icon-off');
+            const iconOn = document.getElementById('pw-icon-on');
+            if (input.type === 'password') {
+                input.type = 'text';
+                iconOff.classList.add('hidden');
+                iconOn.classList.remove('hidden');
+            } else {
+                input.type = 'password';
+                iconOff.classList.remove('hidden');
+                iconOn.classList.add('hidden');
+            }
+        }
+
+        /* Turf Selection */
+        const turfs = [
+            { name: 'Fabzia Arena', frequent: true },
+            { name: 'Skyline Sports Turf', frequent: false },
+            { name: 'Green Park Turf', frequent: true },
+            { name: 'Urban Kick Arena', frequent: false },
+            { name: 'Olympia Turf', frequent: false },
+            { name: 'City Kickers', frequent: true },
+            { name: 'Galaxy Sports Hub', frequent: false },
+            { name: 'Premier Pitch', frequent: true }
+        ];
+
+        // Temporary selections inside bottom sheet (uncommitted)
+        const tempSelectedTurfs = new Set();
+        // Committed selections (after Apply)
+        let committedTurfs = [];
+        // Nicknames keyed by turf name
+        const turfNicknames = {};
+
+        function renderTurfs() {
+            const list = document.getElementById('turf-list');
+            const searchInput = document.getElementById('turf-search');
+            const searchQ = searchInput ? searchInput.value.toLowerCase() : '';
+            list.innerHTML = '';
+            
+            let filteredTurfs = turfs.filter(t => t.name.toLowerCase().includes(searchQ));
+            let frequentTurfs = filteredTurfs.filter(t => t.frequent).sort((a,b) => a.name.localeCompare(b.name));
+            let otherTurfs = filteredTurfs.filter(t => !t.frequent).sort((a,b) => a.name.localeCompare(b.name));
+            
+            if (frequentTurfs.length > 0) {
+                const head = document.createElement('div');
+                head.className = 'px-3 py-2 text-[13px] font-semibold text-app-sub uppercase tracking-wider font-inter';
+                head.innerText = 'Frequently Searched';
+                list.appendChild(head);
+                frequentTurfs.forEach(t => list.appendChild(createTurfEl(t.name)));
+            }
+            if (otherTurfs.length > 0) {
+                const head = document.createElement('div');
+                head.className = 'px-3 py-2 text-[13px] font-semibold text-app-sub uppercase tracking-wider mt-2 font-inter';
+                head.innerText = 'All Turfs';
+                list.appendChild(head);
+                otherTurfs.forEach(t => list.appendChild(createTurfEl(t.name)));
+            }
+            if (filteredTurfs.length === 0) {
+                list.innerHTML = `<div class="p-4 text-center text-app-placeholder text-[14px] font-inter">No turfs found</div>`;
+            }
+            lucide.createIcons();
+        }
+        
+        function createTurfEl(turfName) {
+            const isSelected = tempSelectedTurfs.has(turfName);
+            const el = document.createElement('div');
+            el.className = 'flex items-center justify-between px-3 py-3 hover:bg-gray-50 cursor-pointer rounded-lg mb-1';
+            el.onclick = () => {
+                if (tempSelectedTurfs.has(turfName)) tempSelectedTurfs.delete(turfName);
+                else tempSelectedTurfs.add(turfName);
+                renderTurfs();
+            };
+            el.innerHTML = `
+                <span class="text-[15px] text-app-text font-medium font-roboto">${turfName}</span>
+                <div class="check-box ${isSelected ? 'active' : ''}">
+                    ${isSelected ? '<i data-lucide="check" class="w-4 h-4 text-white"></i>' : ''}
+                </div>
+            `;
+            return el;
+        }
+
+        function applyTurfSelect() {
+            // Merge new selections: keep existing committed turfs that are still selected, add new ones
+            const newCommitted = [];
+            tempSelectedTurfs.forEach(name => {
+                // Preserve existing nickname if turf was already committed
+                const existing = committedTurfs.find(t => t.name === name);
+                newCommitted.push({
+                    name: name,
+                    nickname: existing ? existing.nickname : (turfNicknames[name] || '')
+                });
+            });
+            committedTurfs = newCommitted;
+
+            // Update display
+            const display = document.getElementById('turf-display');
+            if (committedTurfs.length === 0) {
+                display.value = '';
+            } else if (committedTurfs.length === 1) {
+                display.value = committedTurfs[0].name;
+            } else {
+                display.value = `${committedTurfs.length} Turfs Selected`;
+            }
+
+            renderSelectedTurfCards();
+            closeBS('turf-select');
+        }
+
+        function renderSelectedTurfCards() {
+            const container = document.getElementById('selected-turfs-container');
+            container.innerHTML = '';
+
+            if (committedTurfs.length === 0) return;
+
+            committedTurfs.forEach((turf, index) => {
+                const card = document.createElement('div');
+                card.className = 'turf-card border border-app-border rounded-[12px] p-4 bg-white flex flex-col gap-3';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-[8px] bg-[#eef4fd] flex items-center justify-center shrink-0">
+                                <i data-lucide="map-pin" class="w-4 h-4 text-app-btn"></i>
+                            </div>
+                            <span class="font-inter text-[15px] font-semibold text-app-heading">${turf.name}</span>
+                        </div>
+                        <button onclick="removeTurf(${index})" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 active:bg-red-100 transition-colors group" aria-label="Remove ${turf.name}">
+                            <i data-lucide="trash-2" class="w-4 h-4 text-[#ef4444] group-hover:text-[#dc2626]"></i>
+                        </button>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-inter text-[13px] font-medium text-app-sub">Nickname</label>
+                        <input type="text" 
+                            value="${turf.nickname}" 
+                            oninput="updateNickname(${index}, this.value)"
+                            placeholder="Enter nickname for this turf" 
+                            class="w-full h-[44px] px-3 rounded-[8px] border border-app-border font-roboto text-[15px] font-normal text-app-text placeholder:text-app-placeholder bg-white transition-colors">
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        function updateNickname(index, value) {
+            if (committedTurfs[index]) {
+                committedTurfs[index].nickname = value;
+                turfNicknames[committedTurfs[index].name] = value;
+            }
+        }
+
+        function removeTurf(index) {
+            const removedName = committedTurfs[index].name;
+            committedTurfs.splice(index, 1);
+            tempSelectedTurfs.delete(removedName);
+            delete turfNicknames[removedName];
+
+            // Update display
+            const display = document.getElementById('turf-display');
+            if (committedTurfs.length === 0) {
+                display.value = '';
+            } else if (committedTurfs.length === 1) {
+                display.value = committedTurfs[0].name;
+            } else {
+                display.value = `${committedTurfs.length} Turfs Selected`;
+            }
+
+            renderSelectedTurfCards();
+        }
+
+        // When opening the bottom sheet, sync temp selections with committed
+        function openTurfSheet() {
+            tempSelectedTurfs.clear();
+            committedTurfs.forEach(t => tempSelectedTurfs.add(t.name));
+            const searchInput = document.getElementById('turf-search');
+            if (searchInput) searchInput.value = '';
+            renderTurfs();
+            openBS('turf-select');
+        }
+
+        // Override the onclick on the turf dropdown to use our custom open
+        document.addEventListener('DOMContentLoaded', () => {
+            const turfDropdown = document.querySelector('[onclick="openBS(\'turf-select\')"]');
+            if (turfDropdown) {
+                turfDropdown.removeAttribute('onclick');
+                turfDropdown.addEventListener('click', openTurfSheet);
+            }
+        });
+
+        // Initial render
+        renderTurfs();
+
+        // Bottom Sheet Utilities
+        function openBS(id) {
+            document.getElementById('bs-' + id).classList.add('open');
+        }
+        function closeBS(id) {
+            document.getElementById('bs-' + id).classList.remove('open');
+        }
+
+        function showCancelPopup() {
+            openBS('cancel-confirm');
+        }
+
+        function confirmCancel() {
+            closeBS('cancel-confirm');
+            showErrorToaster();
+            setTimeout(() => {
+                window.location.href = 'home.html';
+            }, 1500);
+        }
+
+        function showSuccessToaster() {
+            const t = document.getElementById('success-toaster');
+            t.classList.remove('-translate-y-[150%]');
+            t.classList.add('translate-y-0');
+            setTimeout(() => {
+                t.classList.remove('translate-y-0');
+                t.classList.add('-translate-y-[150%]');
+                window.location.href = 'home.html';
+            }, 3000);
+        }
+
+        function showErrorToaster() {
+            const t = document.getElementById('error-toaster');
+            t.classList.remove('-translate-y-[150%]');
+            t.classList.add('translate-y-0');
+            setTimeout(() => {
+                t.classList.remove('translate-y-0');
+                t.classList.add('-translate-y-[150%]');
+            }, 3000);
+        }
+
+    </script>
+
+</body>
+</html>
